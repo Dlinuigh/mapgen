@@ -1,0 +1,4 @@
+{
+  "C_Cpp.default.compileCommands": "/home/lion/Projects/mapgen/_build/compile_commands.json",
+  "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
+}
