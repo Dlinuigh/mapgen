@@ -1,7 +1,6 @@
 #include "graphic.h"
 #include <cmath>
 #include <iostream>
-#include <map>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -130,7 +129,8 @@ void graphic::cal_pos() {
     tools.push_back(b);
     enable.push_back(false);
   }
-  data.resize(col, std::vector<char>(row, ' '));
+  data.resize(col, std::vector<char>(row, ' '));///data 初始化为空格。
+  sign.resize(col, std::vector<bool>(row, false));
 }
 
 bool graphic::is_valid(int x, int y) {
@@ -138,8 +138,12 @@ bool graphic::is_valid(int x, int y) {
 }
 
 void graphic::dfs(int x, int y, std::vector<point> &adj_set, char target) {
-  if (!is_valid(x, y) || data[x][y] != target) {
+  if (!is_valid(x, y)){
     return;
+  }else if((sign[x][y] == true)) {
+    return;
+  }else if(data[x][y] != target){
+    return ;
   }
 
   // 将当前点加入相邻点集合
@@ -147,6 +151,7 @@ void graphic::dfs(int x, int y, std::vector<point> &adj_set, char target) {
 
   // 标记当前点已访问
   data[x][y] = enable[2] ? ' ' : (char)code;
+  sign[x][y] = true;
 
   // 定义四个方向的偏移量
   int dx[] = {-1, 1, 0, 0};
@@ -209,7 +214,7 @@ void graphic::handle(SDL_Event event) {
           area_start_col = c;
           area_start_row = r;
           area = true;
-        } else if (enable[1] && area) {
+        } else if (enable[1] && area) { // area function 
           int start_x = std::min(area_start_col, c);
           int end_x = std::max(area_start_col, c);
           int start_y = std::min(area_start_row, r);
@@ -221,10 +226,11 @@ void graphic::handle(SDL_Event event) {
             }
           }
           area = false;
-        } else if (enable[0]) {
+        } else if (enable[0]) { // point function
           data[c][r] = enable[2] ? ' ' : (char)code;
           draw_data(c, r);
-        } else if (enable[3]) {
+        } else if (enable[3]) { // fill function
+          sign.assign(col, std::vector<bool>(row, false));
           std::vector<point> adj_set = find_adj_set(c, r);
           for (size_t i = 0; i < adj_set.size(); i++) {
             int c_t = adj_set[i].x;
@@ -316,7 +322,10 @@ void graphic::handle(SDL_Event event) {
 }
 
 SDL_Texture *graphic::create_texture_from_char(char c) {
-  SDL_Surface *surface = TTF_RenderText_Solid(font, &c, {0, 0, 0, 0});
+  char ch[2]="";
+  ch[0] = c;
+  ch[1] = '\0';
+  SDL_Surface *surface = TTF_RenderText_Solid(font, ch, {0, 0, 0, SDL_ALPHA_OPAQUE});
   SDL_Texture *result = SDL_CreateTextureFromSurface(render, surface);
   SDL_DestroySurface(surface);
   return result;
@@ -334,7 +343,8 @@ void graphic::draw_data(int i, int j) {
   SDL_SetRenderDrawColor(render, 255, 255, 255, SDL_ALPHA_OPAQUE);
   SDL_FRect dst = {map[i][j].x, map[i][j].y, 1.0f * tile, 1.0f * tile};
   SDL_RenderFillRect(render, &dst);
-  SDL_RenderTexture(render, text, NULL, &dst);
+  if(data[i][j]!=' ')
+    SDL_RenderTexture(render, text, NULL, &dst);
 }
 
 // void graphic::draw_blueprint(SDL_Event event) {

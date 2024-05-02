@@ -32,6 +32,7 @@ class graphic {
   std::vector<bool> enable;
   std::vector<std::vector<point>> map;
   std::vector<std::vector<char>> data;
+  std::vector<std::vector<bool>> sign;
   SDL_Texture *tools_texture;
   SDL_Texture *cells;
   SDL_Texture *tool;
@@ -72,7 +73,7 @@ public:
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Init(SDL_INIT_EVENTS);
     TTF_Init();
-    std::string pwd = "/home/lion/Projects/farm/mapgen/";
+    std::string pwd = "/home/lion/Projects/mapgen/";
     std::string font_name = "assets/Terminus.ttf";
     std::string tool_name = "assets/tool.png";
     std::string ttf_file_path = (pwd+font_name);
