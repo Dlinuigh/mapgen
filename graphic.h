@@ -81,7 +81,7 @@ public:
     font = TTF_OpenFont(ttf_file_path.c_str(), 16);
     SDL_Window *window =
         SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_BORDERLESS);
-    render = SDL_CreateRenderer(window, "render", SDL_RENDERER_SOFTWARE);
+    render = SDL_CreateRenderer(window, "render");
     tools_texture =
         SDL_CreateTextureFromSurface(render, IMG_Load(tool_file_path.c_str()));
     cells = SDL_CreateTexture(render, SDL_PIXELFORMAT_ARGB8888,

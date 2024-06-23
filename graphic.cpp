@@ -1,9 +1,7 @@
 #include "graphic.h"
 #include <cmath>
 #include <iostream>
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
+#include <json/json.h>
 
 void graphic::draw_grid() {
   
@@ -57,27 +55,20 @@ void graphic::draw_tool_selected() {
   }
 }
 void graphic::save() {
-  rapidjson::Document document;
-  document.SetObject();
-  rapidjson::Document::AllocatorType &allo = document.GetAllocator();
-  rapidjson::Value m(rapidjson::kArrayType);
-  document.AddMember("layer", this->layer, allo);
-  std::cout << data.size() << data[0].size() << std::endl;
+  Json::Value document;
+  document["layer"] = this->layer;
+  Json::Value m(Json::arrayValue);
   for (size_t j = 0; j < data[0].size(); j++) {
     std::string line;
     for (size_t i = 0; i < data.size(); i++) {
       line.push_back(data[i][j]);
     }
-    rapidjson::Value str(rapidjson::kStringType);
-    str.SetString(line.c_str(), line.size(), allo);
-    m.PushBack(str, allo);
+    m.append(line);
   }
-  document.AddMember("main", m, allo);
-  rapidjson::StringBuffer buffer;
-  buffer.Clear();
-  rapidjson::Writer writer(buffer);
-  document.Accept(writer);
-  std::cout << buffer.GetString() << std::endl;
+  document["main"] = m;
+  Json::StreamWriterBuilder builder;
+  std::string output = Json::writeString(builder, document);
+  std::cout << output << std::endl;
 }
 
 void graphic::cal_pos() {
