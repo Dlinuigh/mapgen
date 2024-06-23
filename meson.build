@@ -8,7 +8,7 @@ deps = [
   dependency('sdl3'),
   dependency('sdl3-image'),
   dependency('sdl3-ttf'),
-  dependency('Json')
+  dependency('jsoncpp')
 ]
 
 exe = executable('mapgen', src, dependencies: deps, install:true)

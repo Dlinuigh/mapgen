@@ -73,7 +73,7 @@ public:
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Init(SDL_INIT_EVENTS);
     TTF_Init();
-    std::string pwd = "/home/lion/Projects/mapgen/";
+    std::string pwd = "/home/lion/Documents/mapgen/";
     std::string font_name = "assets/Terminus.ttf";
     std::string tool_name = "assets/tool.png";
     std::string ttf_file_path = (pwd+font_name);
@@ -81,7 +81,7 @@ public:
     font = TTF_OpenFont(ttf_file_path.c_str(), 16);
     SDL_Window *window =
         SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_BORDERLESS);
-    render = SDL_CreateRenderer(window, "render");
+    render = SDL_CreateRenderer(window, nullptr);
     tools_texture =
         SDL_CreateTextureFromSurface(render, IMG_Load(tool_file_path.c_str()));
     cells = SDL_CreateTexture(render, SDL_PIXELFORMAT_ARGB8888,
