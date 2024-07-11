@@ -5,9 +5,9 @@ src = [
   'graphic.cpp'
 ]
 deps = [
-  dependency('sdl3'),
-  dependency('sdl3-image'),
-  dependency('sdl3-ttf'),
+  dependency('SDL3'),
+  dependency('SDL3_image'),
+  dependency('SDL3_ttf'),
   dependency('jsoncpp')
 ]
 

@@ -233,12 +233,12 @@ void graphic::handle(SDL_Event event) {
     }
   }
   if (event.type == SDL_EVENT_KEY_DOWN) {
-    if (event.key.keysym.mod & SDL_KMOD_SHIFT) {
-      if (event.key.keysym.sym >= (int)'a' &&
-          event.key.keysym.sym <= (int)'z') {
-        code = event.key.keysym.sym - 'a' + 'A';
+    if (event.key.mod & SDL_KMOD_SHIFT) {
+      if (event.key.key >= (int)'a' &&
+          event.key.key <= (int)'z') {
+        code = event.key.key - 'a' + 'A';
       } else {
-        switch (event.key.keysym.sym) {
+        switch (event.key.key) {
         case '`':
           code = '~';
           break;
@@ -304,10 +304,10 @@ void graphic::handle(SDL_Event event) {
           break;
         }
       }
-    } else if (event.key.keysym.mod & SDL_KMOD_CAPS) {
-      code = event.key.keysym.sym - 'a' + 'A';
+    } else if (event.key.mod & SDL_KMOD_CAPS) {
+      code = event.key.key - 'a' + 'A';
     } else {
-      code = event.key.keysym.sym;
+      code = event.key.key;
     }
   }
 }

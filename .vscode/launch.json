@@ -5,28 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(gdb) Launch",
-      "type": "cppdbg",
+      "type": "gdb",
       "request": "launch",
-      "program": "${workspaceFolder}/_build/mapgen",
-      "args": ["4","4","0"],
-      "stopAtEntry": false,
-      "cwd": "${fileDirname}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
-          {
-              "description": "Enable pretty-printing for gdb",
-              "text": "-enable-pretty-printing",
-              "ignoreFailures": true
-          },
-          {
-              "description": "Set Disassembly Flavor to Intel",
-              "text": "-gdb-set disassembly-flavor intel",
-              "ignoreFailures": true
-          }
-      ]
+      "name": "(Debug) Mapgen",
+      "target": "_build/mapgen",
+      "cwd": "${workspaceRoot}",
+      "valuesFormatting": "parseText",
+      "arguments": "25 25 0",
     }
   ]
 }

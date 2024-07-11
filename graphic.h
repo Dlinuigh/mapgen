@@ -80,7 +80,7 @@ public:
     std::string tool_file_path = (pwd+tool_name);
     font = TTF_OpenFont(ttf_file_path.c_str(), 16);
     SDL_Window *window =
-        SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_BORDERLESS);
+        SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_INPUT_FOCUS);
     render = SDL_CreateRenderer(window, nullptr);
     tools_texture =
         SDL_CreateTextureFromSurface(render, IMG_Load(tool_file_path.c_str()));
@@ -121,7 +121,7 @@ public:
     SDL_DestroyTexture(cells);
   }
   bool is_quit(SDL_Event event){
-    return !(event.type == SDL_EVENT_KEY_DOWN && event.key.keysym.sym == SDLK_q && event.key.keysym.mod & SDL_KMOD_CTRL);
+    return !(event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_Q && event.key.mod & SDL_KMOD_CTRL);
   }
 };
 
