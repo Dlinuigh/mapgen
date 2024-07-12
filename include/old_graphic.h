@@ -3,34 +3,16 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <glm/glm.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
-class point {
-public:
-    float x,y;
-  point();
-  point(float _x, float _y):x(_x), y(_y){}
-};
-
-class btn {
-public:
-  SDL_FRect pos;
-  btn();
-  btn(float x, float y, float w, float h) {
-    pos.x = x;
-    pos.y = y;
-    pos.w = w;
-    pos.h = h;
-  }
-};
-
-class graphic {
+class Graphic {
   SDL_Renderer *render;
   std::vector<btn> tools;
   std::vector<bool> enable;
-  std::vector<std::vector<point>> map;
+  std::vector<std::vector<glm::ivec2>> map;
   std::vector<std::vector<char>> data;
   std::vector<std::vector<bool>> sign;
   SDL_Texture *tools_texture;
@@ -53,6 +35,7 @@ class graphic {
   int tools_num;
   int cell_x;
   int cell_y;
+  SDL_FRect viewport;
   uint_fast8_t code;
   std::map<uint_fast8_t, SDL_Texture *> t_map;
   SDL_Texture* create_texture_from_char(char);
@@ -64,10 +47,10 @@ class graphic {
   void save();
   void cal_pos();
   bool is_valid(int, int);
-  void dfs(int, int, std::vector<point>&, char);
-  std::vector<point> find_adj_set(int, int);
+  void dfs(int, int, std::vector<glm::ivec2>&, char);
+  std::vector<glm::ivec2> find_adj_set(int, int);
 public:
-  graphic(int w, int h, int l) : col(w), row(h){
+  Graphic(int w, int h, int l) : col(w), row(h){
     layer = l;
     cal_pos();
     SDL_Init(SDL_INIT_VIDEO);
@@ -80,7 +63,7 @@ public:
     std::string tool_file_path = (pwd+tool_name);
     font = TTF_OpenFont(ttf_file_path.c_str(), 16);
     SDL_Window *window =
-        SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_INPUT_FOCUS);
+        SDL_CreateWindow("Mapgen", width, height, SDL_WINDOW_RESIZABLE);
     render = SDL_CreateRenderer(window, nullptr);
     tools_texture =
         SDL_CreateTextureFromSurface(render, IMG_Load(tool_file_path.c_str()));
@@ -94,6 +77,11 @@ public:
     SDL_SetRenderTarget(render, tool);
     SDL_SetRenderDrawColor(render, 255, 255, 255, 0);
     SDL_RenderClear(render);
+    // FIXME 虽然画面进行了左移，但是鼠标没有，右侧没有左移，放大后整体进行了放缩。
+    viewport.w = width;
+    viewport.h = height;
+    viewport.x = 100;
+    viewport.y = 0;
   }
   void draw_ui();
   void draw_grid();
@@ -102,7 +90,7 @@ public:
   void draw_tool_selected();
   void end() {
     SDL_SetRenderTarget(render, NULL);
-    SDL_RenderTexture(render, cells, NULL, NULL);
+    SDL_RenderTexture(render, cells, &viewport, NULL);
     SDL_RenderPresent(render);
   }
   void begin() {

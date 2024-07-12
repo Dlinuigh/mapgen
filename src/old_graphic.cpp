@@ -3,7 +3,7 @@
 #include <iostream>
 #include <json/json.h>
 
-void graphic::draw_grid() {
+void Graphic::draw_grid() {
   
   for (int i = 0; i <= col; i++) {
     SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -30,13 +30,13 @@ void graphic::draw_grid() {
     SDL_RenderFillRect(render, &line);
   }
 }
-void graphic::draw_tool() {
+void Graphic::draw_tool() {
   for (int i = 0; i < tools_num; i++) {
     SDL_FRect src = {16.0f * i, 0.0f, 16.0f, 16.0f};
     SDL_RenderTexture(render, tools_texture, &src, &tools[i].pos);
   }
 }
-void graphic::draw_tool_selected() {
+void Graphic::draw_tool_selected() {
   if (enable[0]) {
     SDL_FRect src = {0.0f, 16.0f, 16.0f, 16.0f};
     SDL_RenderTexture(render, tools_texture, &src, &tools[0].pos);
@@ -54,7 +54,7 @@ void graphic::draw_tool_selected() {
     SDL_RenderTexture(render, tools_texture, &src, &tools[3].pos);
   }
 }
-void graphic::save() {
+void Graphic::save() {
   Json::Value document;
   document["layer"] = this->layer;
   Json::Value m(Json::arrayValue);
@@ -71,7 +71,7 @@ void graphic::save() {
   std::cout << output << std::endl;
 }
 
-void graphic::cal_pos() {
+void Graphic::cal_pos() {
   tool_sep = 2;
   tool_margin = 2;
   margin = 64;
@@ -124,11 +124,11 @@ void graphic::cal_pos() {
   sign.resize(col, std::vector<bool>(row, false));
 }
 
-bool graphic::is_valid(int x, int y) {
+bool Graphic::is_valid(int x, int y) {
   return x >= 0 && x < col && y >= 0 && y < row;
 }
 
-void graphic::dfs(int x, int y, std::vector<point> &adj_set, char target) {
+void Graphic::dfs(int x, int y, std::vector<point> &adj_set, char target) {
   if (!is_valid(x, y)){
     return;
   }else if((sign[x][y] == true)) {
@@ -156,14 +156,14 @@ void graphic::dfs(int x, int y, std::vector<point> &adj_set, char target) {
   }
 }
 
-std::vector<point> graphic::find_adj_set(int c, int r) {
+std::vector<point> Graphic::find_adj_set(int c, int r) {
   std::vector<point> adj_set;
   char target = data[c][r];
   dfs(c, r, adj_set, target);
   return adj_set;
 }
 
-void graphic::handle(SDL_Event event) {
+void Graphic::handle(SDL_Event event) {
   if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     if (event.button.button == SDL_BUTTON_LEFT) {
       int x = event.button.x;
@@ -312,7 +312,7 @@ void graphic::handle(SDL_Event event) {
   }
 }
 
-SDL_Texture *graphic::create_texture_from_char(char c) {
+SDL_Texture *Graphic::create_texture_from_char(char c) {
   char ch[2]="";
   ch[0] = c;
   ch[1] = '\0';
@@ -322,7 +322,7 @@ SDL_Texture *graphic::create_texture_from_char(char c) {
   return result;
 }
 
-void graphic::draw_data(int i, int j) {
+void Graphic::draw_data(int i, int j) {
   auto it = t_map.find(data[i][j]);
   SDL_Texture *text;
   if (it != t_map.end()) {
@@ -338,7 +338,7 @@ void graphic::draw_data(int i, int j) {
     SDL_RenderTexture(render, text, NULL, &dst);
 }
 
-// void graphic::draw_blueprint(SDL_Event event) {
+// void Graphic::draw_blueprint(SDL_Event event) {
 //   int x = event.button.x;
 //   int y = event.button.y;
 //   if (x >= cell_x && x < width - cell_x && y >= cell_y && y < height - margin) {

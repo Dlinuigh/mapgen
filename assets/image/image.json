@@ -1,0 +1,51 @@
+[
+    {
+        "name": "tool",
+        "file": "tool.png",
+        "size": 32,
+        "images": [
+            {
+                "name": "point",
+                "pos": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "rect",
+                "pos": [
+                    1,
+                    0
+                ]
+            },
+            {
+                "name": "eraser",
+                "pos": [
+                    2,
+                    0
+                ]
+            },
+            {
+                "name": "bucket",
+                "pos": [
+                    3,
+                    0
+                ]
+            },
+            {
+                "name": "save",
+                "pos": [
+                    4,
+                    0
+                ]
+            },
+            {
+                "name": "select",
+                "pos": [
+                    0,
+                    1
+                ]
+            }
+        ]
+    }
+]
