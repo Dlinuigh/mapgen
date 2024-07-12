@@ -21,15 +21,12 @@ class Graphic {
   std::map<std::string, int> images;
   // get png file image, the whole image. use id, not filename
   SDL_Surface *get_image(const std::string &name);
-  void init() {
-    load_images();
-  }
+  void init() { load_images(); }
 
 public:
   // draw tile from name.
   // 因为要用widget,所以应该返回一个texture.
-  SDL_Texture *get_tile(SDL_Renderer *render, const std::string &name,
-                        const std::string &tilename);
+  SDL_Surface *get_tile(const std::string &name, const std::string &tilename);
   static Graphic &getInstance() {
     static Graphic instance;
     return instance;

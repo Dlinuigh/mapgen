@@ -24,7 +24,7 @@ SDL_Surface *Graphic::get_image(const std::string &name) {
   else
     return nullptr;
 }
-SDL_Texture *Graphic::get_tile(SDL_Renderer *render, const std::string &name,
+SDL_Surface *Graphic::get_tile(const std::string &name,
                                const std::string &tilename) {
   glm::ivec2 pos;
   SDL_Surface *sur;
@@ -41,15 +41,10 @@ SDL_Texture *Graphic::get_tile(SDL_Renderer *render, const std::string &name,
     }
     pos = tileset[tilename];
     sur = textures[name];
-    SDL_FRect tile_src = {static_cast<float>(pos.x * size),
-                          static_cast<float>(pos.y * size),
-                          static_cast<float>(size), static_cast<float>(size)};
-    SDL_Texture *src = SDL_CreateTextureFromSurface(render, sur);
-    // caculator dst to replace nullptr;
-    SDL_Texture *result = SDL_CreateTexture(
-        render, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, size, size);
-    SDL_SetRenderTarget(render, result);
-    SDL_RenderTexture(render, src, &tile_src, nullptr);
+    SDL_Rect tile_src = {pos.x * size, pos.y * size, size, size};
+    SDL_Surface *result =
+        SDL_CreateSurface(size, size, SDL_PIXELFORMAT_ARGB8888);
+    SDL_BlitSurface(sur, &tile_src, result, nullptr);
     return result;
   } else {
     return nullptr;

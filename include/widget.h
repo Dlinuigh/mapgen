@@ -13,7 +13,7 @@ public:
   SDL_FRect area;   // 绝对区域,该位置需要后续的计算进行调整
   TTF_Font *font;   // 来自game管理的字体
   SDL_Color fcolor; // 字体颜色
-  SDL_Texture *bg;  // 背景图片
+  SDL_Surface *bg;  // 背景图片
   float ratio;
   // w/h的比例，用来保持长宽比例地缩放，这个时候总有一个变量不需要统一
   // 还有一点：缩放后不会进行拉伸，要不然会导致变形
@@ -29,23 +29,24 @@ public:
   void resize(float length, bool horizon);
   // 确定位置
   virtual void locate(glm::fvec2 position);
+  virtual void set_desire_size(glm::fvec2 size);
 };
 class Check final : public Widget {
   bool activated;
-  SDL_Texture *check_sign;
+  SDL_Surface *check_sign;
 
 public:
-  explicit Check(SDL_Texture *texture) {
-    bg = texture;
+  explicit Check(SDL_Surface *surface) {
+    bg = surface;
     // 获取背景材质的大小并计算需求大小。在创建时必须要设置bg的信息。
     // 图片保持原始长宽比例才行
-    glm::fvec2 size;
-    SDL_GetTextureSize(texture, &size.x, &size.y);
+    glm::fvec2 size(surface->w, surface->h);
     area.w = size.x;
     area.h = size.y;
     ratio = area.w / area.h;
   }
-  void set_check_texture(SDL_Texture *texture);
+  void activate();
+  void set_check_texture(SDL_Surface *surface);
   void draw(SDL_Renderer *renderer, SDL_Event) override;
   bool click() override;
   ~Check() = default;

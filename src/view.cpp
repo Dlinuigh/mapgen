@@ -32,12 +32,12 @@ void Box::draw(SDL_Renderer *render, SDL_Event event) {
 }
 void Box::set_size() {
   if (vertical) {
-    area.w = children[0]->area.w;
+    area.w = child_size.x;
     for (auto &it : children) {
       area.h += it->area.h;
     }
   } else {
-    area.h = children[0]->area.h;
+    area.h = child_size.y;
     for (auto &it : children) {
       area.w += it->area.w;
     }
@@ -61,6 +61,13 @@ void Box::locate(glm::fvec2 position) {
 void View::push_back(const std::shared_ptr<Widget> &child, Position position) {
   // emplace可以避免使用构造makepair,而是直接在向量末尾进行内存上的构造。
   children.emplace_back(child, position);
+}
+void View::locate(){
+  for(auto &it: children){
+    locate_child(it.first, it.second);
+  }
+}
+void View::locate_child(const std::shared_ptr<Widget> &child, Position position){
   // 根据大小与相对位置确定绝对位置
   glm::fvec2 pos;
   glm::fvec2 rd_corner_pos = {scr_size.x - child->area.w,
