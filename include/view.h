@@ -10,7 +10,7 @@ class Box : public Widget {
   // view中定义大致位置
   std::vector<std::shared_ptr<Widget>> children;
   bool vertical; // 竖直排列？
-  glm::fvec2 child_size;
+  glm::fvec2 child_size={0,0};
 
 public:
   explicit Box(bool _vertical) : vertical(_vertical) {}

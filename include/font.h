@@ -7,7 +7,10 @@
 
 class Font {
 private:
-  Font() {} // Private constructor for singleton pattern
+  Font() {
+    TTF_Init();
+  }
+  // Private constructor for singleton pattern
   Font(Font const &) = delete;
   void operator=(Font const &) = delete;
   std::map<std::pair<std::string, int>, TTF_Font *> flut;
@@ -22,7 +25,7 @@ public:
     auto key = std::make_pair(_font, fsize);
     if (flut.find(key) == flut.end()) {
       std::string ffile = std::string("../assets/font/") + _font;
-      TTF_Font *font = TTF_OpenFont(_font.c_str(), fsize);
+      TTF_Font *font = TTF_OpenFont(ffile.c_str(), fsize);
       flut[key] = font;
     }
     return flut[key];

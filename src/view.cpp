@@ -39,17 +39,19 @@ void Box::set_size() {
       area.h += it->area.h;
     }
     // 增加对孩子节点的大小的缩放调整。
-    for(auto &it: children){
-      it->resize(child_size.x, vertical);
-    }
+    // FIXME 下面的方法太暴力了，会导致内部孩子节点直接变成600x600这样的等比例尺寸
+    // 然而以前的600x24是正确的。只是因为ratio是1的原因。
+    // for(auto &it: children){
+    //   it->resize(child_size.x, vertical);
+    // }
   } else {
     area.h = child_size.y;
     for (auto &it : children) {
       area.w += it->area.w;
     }
-    for(auto &it: children){
-      it->resize(child_size.y, vertical);
-    }
+    // for(auto &it: children){
+    //   it->resize(child_size.y, vertical);
+    // }
   }
 }
 void Box::locate(glm::fvec2 position) {

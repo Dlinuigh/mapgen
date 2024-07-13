@@ -17,7 +17,6 @@ void Widget::draw(SDL_Renderer *render, SDL_Event) {
   SDL_RenderTexture(render, texture, nullptr, &area);
 }
 void Widget::resize(float length, bool horizon) {
-  // FIXME 这个函数目前并没有使用，然后这个处理，默认是靠左上，这样就不用修改area的xy
   if (horizon) {
     area.w = length;
     area.h = length / ratio;
@@ -33,9 +32,6 @@ void Widget::locate(glm::fvec2 position) {
 void Widget::set_desire_size(glm::fvec2 size) {
   area.w = size.x;
   area.h = size.y;
-}
-void Widget::set_text(std::string _text){
-  text = std::move(_text);
 }
 void Check::set_check_texture(SDL_Surface *surface) { check_sign = surface; }
 void Check::draw(SDL_Renderer *render, SDL_Event) {
@@ -58,4 +54,25 @@ bool Check::click() {
 }
 void Check::activate(){
   activated=!activated;
+}
+void Cell::set_value(char c){
+  // for external function callback to change value to a variable value.
+  value = c;
+}
+bool Cell::click(){
+  if (in() && callback!=nullptr) {
+    callback();
+    return true;
+  } else {
+    return false;
+  }
+}
+void Cell::draw(SDL_Renderer* render, SDL_Event){
+  bg = TTF_RenderUTF8_Solid(font, &value, fcolor);
+  float w = bg->w;
+  float h = bg->h;
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
+  SDL_FRect dst = {area.x+(area.w-w)/2, area.y+(area.h-h)/2, w, h};
+  SDL_RenderTexture(render, texture, nullptr, &dst);
+  SDL_DestroyTexture(texture);
 }
