@@ -2,7 +2,7 @@
     {
         "name": "tool",
         "file": "tool.png",
-        "size": 32,
+        "size": 16,
         "images": [
             {
                 "name": "point",

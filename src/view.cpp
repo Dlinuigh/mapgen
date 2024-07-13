@@ -26,20 +26,29 @@ void Box::draw(SDL_Renderer *render, SDL_Event event) {
   if (bg != nullptr) {
     draw(render, event);
   }
+  // FIXME box会奇怪地绘制根本不是我定义的东西，我怀疑是内容的错误而已。
   for (const auto &it : children) {
     it->draw(render, event);
   }
 }
 void Box::set_size() {
+  // 设置box的大小，但是似乎不能整理孩子的大小。
   if (vertical) {
     area.w = child_size.x;
     for (auto &it : children) {
       area.h += it->area.h;
     }
+    // 增加对孩子节点的大小的缩放调整。
+    for(auto &it: children){
+      it->resize(child_size.x, vertical);
+    }
   } else {
     area.h = child_size.y;
     for (auto &it : children) {
       area.w += it->area.w;
+    }
+    for(auto &it: children){
+      it->resize(child_size.y, vertical);
     }
   }
 }

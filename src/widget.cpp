@@ -17,6 +17,7 @@ void Widget::draw(SDL_Renderer *render, SDL_Event) {
   SDL_RenderTexture(render, texture, nullptr, &area);
 }
 void Widget::resize(float length, bool horizon) {
+  // FIXME 这个函数目前并没有使用，然后这个处理，默认是靠左上，这样就不用修改area的xy
   if (horizon) {
     area.w = length;
     area.h = length / ratio;
@@ -32,6 +33,9 @@ void Widget::locate(glm::fvec2 position) {
 void Widget::set_desire_size(glm::fvec2 size) {
   area.w = size.x;
   area.h = size.y;
+}
+void Widget::set_text(std::string _text){
+  text = std::move(_text);
 }
 void Check::set_check_texture(SDL_Surface *surface) { check_sign = surface; }
 void Check::draw(SDL_Renderer *render, SDL_Event) {

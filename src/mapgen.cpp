@@ -34,18 +34,26 @@ class Mapgen {
     rect->callback = std::bind(&Mapgen::trigger, this, 1);
     eraser->callback = std::bind(&Mapgen::trigger, this, 2);
     bucket->callback = std::bind(&Mapgen::trigger, this, 3);
+    save->callback = std::bind(&Mapgen::print, this);
     set_select_flag.push_back(std::bind(&Check::activate, point));
     set_select_flag.push_back(std::bind(&Check::activate, rect));
     set_select_flag.push_back(std::bind(&Check::activate, eraser));
     set_select_flag.push_back(std::bind(&Check::activate, bucket));
+    point->set_text("point");
+    rect->set_text("rect");
+    eraser->set_text("eraser");
+    bucket->set_text("bucket");
+    save->set_text("save");
     auto panel = std::make_shared<Box>(false);
     panel->push_back(point);
     panel->push_back(rect);
     panel->push_back(eraser);
     panel->push_back(bucket);
     panel->push_back(save);
+    // 整理大小
     panel->set_size();
     v_main->push_back(panel, U_SIDE);
+    // 整理位置
     v_main->locate();
   }
   void handle() {
@@ -71,22 +79,26 @@ class Mapgen {
       request_quit = true;
     }
   }
+  void print(){
+    // print the result and you can output to a file.
+  }
   std::vector<bool> function = {false, false, false, false};
   void trigger(int idx) {
+    std::vector<bool> old = function;
     switch (idx) {
     case 0: {
-      if (function[1])
-        function[1].flip();
-      if(function[3])
-        function[3].flip();
+      if (!function[0]) {
+        function[1] = false;
+        function[3] = false;
+      }
       function[0].flip();
       break;
     }
     case 1: {
-      if (function[0])
-        function[0].flip();
-      if(function[3])
-        function[3].flip();
+      if (!function[1]) {
+        function[0] = false;
+        function[3] = false;
+      }
       function[1].flip();
       break;
     }
@@ -95,17 +107,18 @@ class Mapgen {
       break;
     }
     case 3: {
-      if (function[1])
-        function[1].flip();
-      if(function[0])
-        function[0].flip();
+      if (!function[3]) {
+        function[1] = false;
+        function[0] = false;
+      }
       function[3].flip();
       break;
     }
     default:;
     }
-    for(int i=0;i<4;i++){
-      if(function[i])
+    for (int i = 0; i < 4; i++) {
+      if ((old[i] == false && function[i] == true) ||
+          (old[i] == true && function[i] == false))
         set_select_flag[i]();
     }
   }

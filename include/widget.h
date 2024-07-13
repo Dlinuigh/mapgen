@@ -30,9 +30,10 @@ public:
   // 确定位置
   virtual void locate(glm::fvec2 position);
   virtual void set_desire_size(glm::fvec2 size);
+  void set_text(std::string _text);
 };
 class Check final : public Widget {
-  bool activated;
+  bool activated=false;
   SDL_Surface *check_sign;
 
 public:
