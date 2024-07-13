@@ -1,9 +1,10 @@
 #include "program.h"
 void Program::create_map() {
-  auto map = std::make_shared<Map>(map_size, 18);
-  set_key = std::bind(&Map::set_key, map, code);
-  set_function = std::bind(&Map::set_function, map, function);
+  map = std::make_shared<Map>(map_size, tile_size, render);
+  map->font = font.get_font("Terminus.ttf", 16);
+  map->fcolor = {0,0,0,255};
   v_main->push_back(map, CENTER);
+  v_main->locate();
 }
 void Program::create_v_main() {
   // TODO 我想要增加一个label或者entry以支持当前字符显示和直接输入字符
@@ -123,7 +124,7 @@ void Program::handle() {
     } else {
       code = event.key.key;
     }
-    set_key(code);
+    map->set_key(code);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     // 点击事件由当前的view决定，使得通过添加一个view可以快速实现下拉菜单
     v_main->click();
@@ -174,7 +175,7 @@ void Program::trigger(int idx) {
   }
   default:;
   }
-  set_function(function);
+  map->set_function(function);
   for (int i = 0; i < 4; i++) {
     if ((old[i] == false && function[i] == true) ||
         (old[i] == true && function[i] == false))

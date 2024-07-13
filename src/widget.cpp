@@ -66,6 +66,7 @@ bool Cell::click() {
   }
 }
 void Cell::draw(SDL_Renderer *render, SDL_Event) {
+  // FIXME texture每次都被清空了
   bg = TTF_RenderUTF8_Solid(font, &value, fcolor);
   float w = bg->w;
   float h = bg->h;
@@ -88,6 +89,8 @@ void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
 }
 void Map::draw(SDL_Renderer *render, SDL_Event) {
   // first won't clear texture, just replace.
+  SDL_Texture* target = SDL_GetRenderTarget(render);
+  SDL_SetRenderTarget(render, map_view);
   if (function_state[0]) {
     draw_tile(render, start_pos);
   } else if (function_state[1]) {
@@ -108,6 +111,8 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       draw_tile(render, it);
     }
   }
+  SDL_SetRenderTarget(render, target);
+  SDL_RenderTexture(render, map_view, nullptr, &area);
 }
 bool Map::click() {
   if (in()) {
@@ -127,9 +132,7 @@ void Map::set_key(char c) {
   code = c;
   printf("the key is '%c'\n", c);
 }
-void Map::set_function(std::vector<bool> func) { 
-  // FIXME 这样的bind根本不会动态变化，只能使用绑定时候的值。这个问题需要另外解决
-  function_state = func; }
+void Map::set_function(std::vector<bool> func) { function_state = func; }
 bool Map::is_valid(int x, int y) {
   return x >= 0 && y >= 0 && x < size.x && y < size.y;
 }
@@ -162,6 +165,7 @@ void Map::dfs(int x, int y, std::vector<glm::ivec2> &adj_set, char target) {
 }
 glm::ivec2 Map::get_grid() {
   glm::fvec2 mouse_pos;
+  // FIXME 似乎有问题
   SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
   return glm::ivec2((mouse_pos.x - area.x) / tile_size,
                     (mouse_pos.y - area.y) / tile_size);

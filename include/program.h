@@ -15,6 +15,7 @@ class Program {
   SDL_Texture *view;
   std::shared_ptr<View> v_main;
   glm::ivec2 scr_size;
+  float tile_size;
   Graphic &graphic;
   Font &font;
   char code = ' ';
@@ -22,6 +23,7 @@ class Program {
   std::function<void(char)> set_key;
   std::function<void(std::vector<bool>)> set_function;
   std::vector<std::function<void()>> set_select_flag;
+  std::shared_ptr<Map> map;
   glm::ivec2 map_size;
   std::vector<bool> function = {false, false, false, false};
   void create_map();
@@ -35,8 +37,9 @@ class Program {
   void set_view();
 
 public:
-  Program(int w, int h, int col, int row)
-      : graphic(Graphic::getInstance()), font(Font::getInstance()) {
+  Program(int w, int h, int col, int row, int _tile_size)
+      : tile_size(_tile_size), graphic(Graphic::getInstance()),
+        font(Font::getInstance()) {
     scr_size = glm::ivec2(w, h);
     init();
     set_view();

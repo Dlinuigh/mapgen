@@ -62,7 +62,7 @@ public:
 class Map : public Widget {
   std::vector<std::vector<char>> data;
   std::vector<std::vector<bool>> sign;
-  char code;
+  char code=' ';
   glm::ivec2 size;
   glm::ivec2 start_pos;
   glm::ivec2 end_pos;
@@ -74,10 +74,21 @@ class Map : public Widget {
   void dfs(int, int, std::vector<glm::ivec2> &adj_set, char target);
   SDL_FRect get_area(glm::ivec2);
   void draw_tile(SDL_Renderer*, glm::ivec2);
+  SDL_Texture *map_view;
 public:
-  Map(glm::ivec2 _size, float tilesize) : size(_size), tile_size(tilesize), graphic(Graphic::getInstance()) {
+  Map(glm::ivec2 _size, float tilesize, SDL_Renderer* render) : size(_size), tile_size(tilesize), graphic(Graphic::getInstance()) {
     area.w = size.x*tilesize;
     area.h = size.y*tilesize;
+    data.assign(size.y, std::vector<char>(size.x, ' '));
+    sign.assign(size.y, std::vector<bool>(size.x, false));
+    map_view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
+                                 SDL_TEXTUREACCESS_TARGET, area.w,
+                                 area.h);
+    SDL_SetRenderDrawColor(render, 255, 255, 255, 255);
+    SDL_Texture* texture = SDL_GetRenderTarget(render);
+    SDL_SetRenderTarget(render, map_view);
+    SDL_RenderClear(render);
+    SDL_SetRenderTarget(render, texture);
   }
   void draw(SDL_Renderer *, SDL_Event) override;
   bool click() override;

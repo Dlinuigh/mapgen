@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/_build/mapgen",
-      "args": ["25", "25"],
+      "args": ["25", "25", "24"],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
       "environment": [],
