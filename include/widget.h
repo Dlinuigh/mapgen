@@ -1,5 +1,6 @@
 #ifndef WIDGET_H
 #define WIDGET_H
+#include "graphic.h"
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <functional>
@@ -48,9 +49,6 @@ public:
   bool click() override;
   ~Check() = default;
 };
-// 以前的方法是创建一个map记录，然后使用相对位置计算点击的位置
-// emmm,现在的方法是直接用widget特制。
-// FIXME 这个方法会导致非常非常慢的响应速度，原因目前不知道，可能是625组件太多了，用老方法了
 class Cell : public Widget {
   char value = ' ';
 
@@ -60,5 +58,32 @@ public:
   bool click() override;
   void set_value(char c);
   void draw(SDL_Renderer *, SDL_Event) override;
+};
+class Map : public Widget {
+  std::vector<std::vector<char>> data;
+  std::vector<std::vector<bool>> sign;
+  char code;
+  glm::ivec2 size;
+  glm::ivec2 start_pos;
+  glm::ivec2 end_pos;
+  std::vector<bool> function_state={false, false, false, false}; // 0,1,2,3
+  float tile_size;
+  Graphic &graphic;
+  glm::ivec2 get_grid();
+  bool is_valid(int, int);
+  void dfs(int, int, std::vector<glm::ivec2> &adj_set, char target);
+  SDL_FRect get_area(glm::ivec2);
+  void draw_tile(SDL_Renderer*, glm::ivec2);
+public:
+  Map(glm::ivec2 _size, float tilesize) : size(_size), tile_size(tilesize), graphic(Graphic::getInstance()) {
+    area.w = size.x*tilesize;
+    area.h = size.y*tilesize;
+  }
+  void draw(SDL_Renderer *, SDL_Event) override;
+  bool click() override;
+  // 每一次检测到key的更换需要调用一次
+  void set_key(char c);
+  // 功能的修改需要调用一次
+  void set_function(std::vector<bool> func);
 };
 #endif

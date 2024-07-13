@@ -30,6 +30,11 @@ public:
     }
     return flut[key];
   }
+  ~Font(){
+    for(auto &it: flut){
+      TTF_CloseFont(it.second);
+    }
+  }
 };
 
 #endif

@@ -50,3 +50,11 @@ SDL_Surface *Graphic::get_tile(const std::string &name,
     return nullptr;
   }
 }
+SDL_Surface* Graphic::get_char(char key, TTF_Font* font, SDL_Color fcolor){
+  if(charmap.contains(key))
+    return charmap[key];
+  else{
+    charmap[key] = TTF_RenderText_Solid(font, &key, fcolor);
+    return charmap[key];
+  }
+}

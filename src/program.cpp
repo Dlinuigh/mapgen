@@ -1,22 +1,9 @@
 #include "program.h"
 void Program::create_map() {
-  auto map = std::make_shared<Box>(true);
-  for (int i = 0; i < map_size.x; i++) {
-    auto box = std::make_shared<Box>(false);
-    for (int j = 0; j < map_size.y; j++) {
-      auto cell = std::make_shared<Cell>('c');
-      cell->callback = std::bind(&Cell::set_value, cell, key);
-      cell->font = font.get_font("Terminus.ttf", 16);
-      cell->fcolor = {0,0,0,255};
-      cell->set_desire_size(glm::fvec2(24,24));
-      box->push_back(cell);
-    }
-    box->set_size();
-    map->push_back(box);
-  }
-  map->set_size();
+  auto map = std::make_shared<Map>(map_size, 18);
+  set_key = std::bind(&Map::set_key, map, code);
+  set_function = std::bind(&Map::set_function, map, function);
   v_main->push_back(map, CENTER);
-  v_main->locate();
 }
 void Program::create_v_main() {
   // TODO 我想要增加一个label或者entry以支持当前字符显示和直接输入字符
@@ -60,12 +47,83 @@ void Program::create_v_main() {
 void Program::handle() {
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
-    // 由当前的view决定当前的快捷键
-    for (auto it : v_main->shotcut) {
-      if (it.first == event.key.key) {
-        it.second();
+    if (event.key.mod & SDL_KMOD_SHIFT) {
+      if (event.key.key >= (int)'a' &&
+          event.key.key <= (int)'z') {
+        code = event.key.key - 'a' + 'A';
+      } else {
+        switch (event.key.key) {
+        case '`':
+          code = '~';
+          break;
+        case '1':
+          code = '!';
+          break;
+        case '2':
+          code = '@';
+          break;
+        case '3':
+          code = '#';
+          break;
+        case '4':
+          code = '$';
+          break;
+        case '5':
+          code = '%';
+          break;
+        case '6':
+          code = '^';
+          break;
+        case '7':
+          code = '&';
+          break;
+        case '8':
+          code = '*';
+          break;
+        case '9':
+          code = '(';
+          break;
+        case '0':
+          code = ')';
+          break;
+        case '-':
+          code = '_';
+          break;
+        case '=':
+          code = '+';
+          break;
+        case '[':
+          code = '{';
+          break;
+        case ']':
+          code = '}';
+          break;
+        case '\\':
+          code = '|';
+          break;
+        case ';':
+          code = ':';
+          break;
+        case '\'':
+          code = '\"';
+          break;
+        case ',':
+          code = '<';
+          break;
+        case '.':
+          code = '>';
+          break;
+        case '/':
+          code = '?';
+          break;
+        }
       }
+    } else if (event.key.mod & SDL_KMOD_CAPS) {
+      code = event.key.key - 'a' + 'A';
+    } else {
+      code = event.key.key;
     }
+    set_key(code);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     // 点击事件由当前的view决定，使得通过添加一个view可以快速实现下拉菜单
     v_main->click();
@@ -116,6 +174,7 @@ void Program::trigger(int idx) {
   }
   default:;
   }
+  set_function(function);
   for (int i = 0; i < 4; i++) {
     if ((old[i] == false && function[i] == true) ||
         (old[i] == true && function[i] == false))

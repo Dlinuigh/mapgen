@@ -17,8 +17,10 @@ class Program {
   glm::ivec2 scr_size;
   Graphic &graphic;
   Font &font;
-  char key = ' ';
+  char code = ' ';
   bool request_quit = false;
+  std::function<void(char)> set_key;
+  std::function<void(std::vector<bool>)> set_function;
   std::vector<std::function<void()>> set_select_flag;
   glm::ivec2 map_size;
   std::vector<bool> function = {false, false, false, false};
