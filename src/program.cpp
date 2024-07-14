@@ -1,6 +1,6 @@
 #include "program.h"
-#include <iostream>
 #include <format>
+#include <iostream>
 void Program::create_map() {
   map = std::make_shared<Map>(map_size, tile_size, render);
   map->font = font.get_font("Terminus.ttf", 16);
@@ -8,19 +8,18 @@ void Program::create_map() {
   label_key = std::make_shared<Label>();
   label_key->font = font.get_font("Terminus.ttf", 16);
   label_key->fcolor = {0, 0, 0, 255};
-  label_key->set_text("c");
+  label_key->set_text(" ");
   v_main->push_back(label_key, LU_CORNER);
   label_position = std::make_shared<Label>();
   label_position->font = font.get_font("Terminus.ttf", 16);
   label_position->fcolor = {0, 0, 0, 255};
-  label_position->set_text("<025,250>");
+  label_position->set_text("<025,520>");
   v_main->push_back(label_position, RU_CORNER);
   v_main->push_back(map, CENTER);
-  v_main->locate();
 }
 void Program::create_v_main() {
-  // TODO 我想要增加一个label或者entry以支持当前字符显示和直接输入字符
   v_main = std::make_shared<View>(scr_size);
+  create_map();
   auto point = std::make_shared<Check>(graphic.get_tile("tool", "point"));
   auto rect = std::make_shared<Check>(graphic.get_tile("tool", "rect"));
   auto eraser = std::make_shared<Check>(graphic.get_tile("tool", "eraser"));
@@ -58,7 +57,6 @@ void Program::create_v_main() {
   v_main->locate();
 }
 void Program::handle() {
-  // TODO 右键移动视图
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
     if (event.key.mod & SDL_KMOD_SHIFT) {
@@ -138,10 +136,11 @@ void Program::handle() {
     }
     map->set_key(code);
     char tmp[2];
-    tmp[0]=code;
-    tmp[1]='\0';
+    tmp[0] = code;
+    tmp[1] = '\0';
     label_key->set_text(tmp);
-  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+             event.button.button == SDL_BUTTON_LEFT) {
     // 点击事件由当前的view决定，使得通过添加一个view可以快速实现下拉菜单
     v_main->click();
   } else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
@@ -153,10 +152,29 @@ void Program::handle() {
     v_main->locate();
   } else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
     request_quit = true;
-  } else if(event.type == SDL_EVENT_MOUSE_MOTION && map->in()){
+  } else if (event.type == SDL_EVENT_MOUSE_MOTION && map->in() &&
+             !right_button_down) {
     glm::ivec2 mouse_position = map->get_grid();
-    std::string str_position = std::format("<{},{}>", mouse_position.x, mouse_position.y);
+    std::string str_position =
+        std::format("<{},{}>", mouse_position.x, mouse_position.y);
     label_position->set_text(str_position);
+  }
+  else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+           event.button.button == SDL_BUTTON_RIGHT) {
+    right_button_down = true;
+    SDL_GetMouseState(&right_button_position.x, &right_button_position.y);
+    map_old_position.x = map->area.x;
+    map_old_position.y = map->area.y;
+  } else if (event.type == SDL_EVENT_MOUSE_MOTION && right_button_down) {
+    glm::fvec2 tmp_position;
+    SDL_GetMouseState(&tmp_position.x, &tmp_position.y);
+    map->area.x =
+        map_old_position.x + (tmp_position.x - right_button_position.x);
+    map->area.y =
+        map_old_position.y + (tmp_position.y - right_button_position.y);
+  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
+             event.button.button == SDL_BUTTON_RIGHT) {
+    right_button_down = false;
   }
 }
 void Program::print() {
