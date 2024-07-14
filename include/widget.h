@@ -110,7 +110,6 @@ public:
   }
 };
 class Label : public Widget {
-  // TODO 用来显示当前所在坐标和当前的key.
   std::string text;
   SDL_Surface* surface;
   Graphic &graphic;
