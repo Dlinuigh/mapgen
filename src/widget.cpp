@@ -66,7 +66,6 @@ bool Cell::click() {
   }
 }
 void Cell::draw(SDL_Renderer *render, SDL_Event) {
-  // FIXME texture每次都被清空了
   bg = TTF_RenderUTF8_Solid(font, &value, fcolor);
   float w = bg->w;
   float h = bg->h;
@@ -75,10 +74,8 @@ void Cell::draw(SDL_Renderer *render, SDL_Event) {
   SDL_RenderTexture(render, texture, nullptr, &dst);
   SDL_DestroyTexture(texture);
 }
-void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
-  char draw_char = function_state[2] ? ' ' : code;
-  SDL_FRect dst = get_area(pos);
-  SDL_Surface *surface = graphic.get_char(draw_char, font, fcolor);
+void Map::draw_char(SDL_Renderer *render, SDL_FRect dst) {
+  SDL_Surface *surface = graphic.get_char(code, font, fcolor);
   float w = surface->w;
   float h = surface->h;
   SDL_FRect draw_text_area = {dst.x + (dst.w - w) / 2, dst.y + (dst.h - h) / 2,
@@ -87,42 +84,71 @@ void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
   SDL_RenderTexture(render, texture, nullptr, &draw_text_area);
   SDL_DestroyTexture(texture);
 }
+void Map::clear_tile(SDL_Renderer *render, SDL_FRect dst) {
+  SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
+  SDL_RenderFillRect(render, &dst);
+}
+void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
+  // TODO 使用背景色覆盖该单元格,对于该单元格在上面绘制grid就行。
+  SDL_FRect dst = get_area(pos);
+  if (function_state[2]) {
+    // clear
+    clear_tile(render, dst);
+  } else {
+    // 对于rect可能出现，覆盖相同的tile,重绘，但是我不管。s
+    clear_tile(render, dst);
+    draw_char(render, dst);
+  }
+}
 void Map::draw(SDL_Renderer *render, SDL_Event) {
-  // first won't clear texture, just replace.
-  SDL_Texture* target = SDL_GetRenderTarget(render);
+  SDL_Texture *target = SDL_GetRenderTarget(render);
   SDL_SetRenderTarget(render, map_view);
-  if (function_state[0]) {
-    draw_tile(render, start_pos);
-  } else if (function_state[1]) {
-    int min_x = std::min(start_pos.x, end_pos.x);
-    int min_y = std::min(start_pos.y, end_pos.y);
-    int max_x = std::max(start_pos.x, end_pos.x);
-    int max_y = std::max(start_pos.y, end_pos.y);
-    for (int i = min_x; i < max_x; i++) {
-      for (int j = min_y; j < max_y; j++) {
-        draw_tile(render, glm::ivec2(i, j));
+  if (begin_draw) {
+    if (function_state[0]) {
+      // 对于dfs会提前修改data
+      data[start_pos.x][start_pos.y] = function_state[2] ? ' ' : code;
+      draw_tile(render, start_pos);
+    } else if (function_state[1]) {
+      int min_x = std::min(start_pos.x, end_pos.x);
+      int min_y = std::min(start_pos.y, end_pos.y);
+      int max_x = std::max(start_pos.x, end_pos.x);
+      int max_y = std::max(start_pos.y, end_pos.y);
+      for (int i = min_x; i < max_x; i++) {
+        for (int j = min_y; j < max_y; j++) {
+          data[i][j] = function_state[2] ? ' ' : code;
+          draw_tile(render, glm::ivec2(i, j));
+        }
+      }
+    } else if (function_state[3]) {
+      char find_this_same = data[start_pos.x][start_pos.y];
+      std::vector<glm::ivec2> adj_set;
+      sign.assign(size.x, std::vector<bool>(size.y, false));
+      dfs(start_pos.x, start_pos.y, adj_set, find_this_same);
+      for (auto &it : adj_set) {
+        draw_tile(render, it);
       }
     }
-  } else if (function_state[3]) {
-    char target = data[start_pos.x][start_pos.y];
-    std::vector<glm::ivec2> adj_set;
-    dfs(start_pos.x, start_pos.y, adj_set, target);
-    for (auto &it : adj_set) {
-      draw_tile(render, it);
-    }
+    begin_draw = false;
   }
   SDL_SetRenderTarget(render, target);
   SDL_RenderTexture(render, map_view, nullptr, &area);
 }
 bool Map::click() {
   if (in()) {
-    if (!function_state[1])
+    if (!function_state[1]) {
       start_pos = get_grid();
-    else {
+      begin_draw = true;
+    } else {
       // Rect function
-      end_pos = get_grid();
+      if (already_select_one) {
+        end_pos = get_grid();
+        begin_draw = true;
+        already_select_one = false;
+      } else {
+        start_pos = get_grid();
+        already_select_one = true;
+      }
     }
-    printf("%d, %d\n", start_pos.x, start_pos.y);
     return true;
   } else {
     return false;
@@ -165,12 +191,10 @@ void Map::dfs(int x, int y, std::vector<glm::ivec2> &adj_set, char target) {
 }
 glm::ivec2 Map::get_grid() {
   glm::fvec2 mouse_pos;
-  // FIXME 似乎有问题
   SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-  return glm::ivec2((mouse_pos.x - area.x) / tile_size,
-                    (mouse_pos.y - area.y) / tile_size);
+  return glm::ivec2((mouse_pos.x - area.x) / (int)tile_size,
+                    (mouse_pos.y - area.y) / (int)tile_size);
 }
 SDL_FRect Map::get_area(glm::ivec2 pos) {
-  return {area.x + pos.x * tile_size, area.y + pos.y * tile_size, tile_size,
-          tile_size};
+  return {pos.x * tile_size, pos.y * tile_size, tile_size, tile_size};
 }

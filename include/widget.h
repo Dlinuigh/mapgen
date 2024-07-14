@@ -74,7 +74,12 @@ class Map : public Widget {
   void dfs(int, int, std::vector<glm::ivec2> &adj_set, char target);
   SDL_FRect get_area(glm::ivec2);
   void draw_tile(SDL_Renderer*, glm::ivec2);
+  void draw_char(SDL_Renderer*,SDL_FRect);
   SDL_Texture *map_view;
+  bool begin_draw=false;
+  bool already_select_one=false;
+  SDL_Color bgcolor={255,128,255,SDL_ALPHA_OPAQUE};
+  void clear_tile(SDL_Renderer*, SDL_FRect);
 public:
   Map(glm::ivec2 _size, float tilesize, SDL_Renderer* render) : size(_size), tile_size(tilesize), graphic(Graphic::getInstance()) {
     area.w = size.x*tilesize;
@@ -84,7 +89,7 @@ public:
     map_view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
                                  SDL_TEXTUREACCESS_TARGET, area.w,
                                  area.h);
-    SDL_SetRenderDrawColor(render, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
     SDL_Texture* texture = SDL_GetRenderTarget(render);
     SDL_SetRenderTarget(render, map_view);
     SDL_RenderClear(render);
