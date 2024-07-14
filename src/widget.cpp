@@ -99,27 +99,27 @@ void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
     draw_char(render, dst);
   }
 }
-void Map::draw_grid(SDL_Renderer* render){
+void Map::draw_grid(SDL_Renderer *render) {
   for (int i = 0; i <= size.x; i++) {
     SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    if(i%5 == 0&&i!=0&&i!=size.x){
+    if (i % 5 == 0 && i != 0 && i != size.x) {
       SDL_SetRenderDrawColor(render, 0, 0, 255, SDL_ALPHA_OPAQUE);
     }
-    if(i%10 == 0&&i!=0&&i!=size.x){
+    if (i % 10 == 0 && i != 0 && i != size.x) {
       SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
     }
-    SDL_FRect line = {tile_size*(i+1), 0, 1, tile_size*size.y};
+    SDL_FRect line = {tile_size * (i + 1), 0, 1, tile_size * size.y};
     SDL_RenderFillRect(render, &line);
   }
   for (int j = 0; j <= size.y; j++) {
     SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    if(j%5 == 0&&j!=0&&j!=size.y){
+    if (j % 5 == 0 && j != 0 && j != size.y) {
       SDL_SetRenderDrawColor(render, 0, 0, 255, SDL_ALPHA_OPAQUE);
     }
-    if(j%10 == 0&&j!=0&&j!=size.y){
+    if (j % 10 == 0 && j != 0 && j != size.y) {
       SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
     }
-    SDL_FRect line = {0, tile_size*(j+1), tile_size*size.x, 1};
+    SDL_FRect line = {0, tile_size * (j + 1), tile_size * size.x, 1};
     SDL_RenderFillRect(render, &line);
   }
 }
@@ -178,10 +178,7 @@ bool Map::click() {
     return false;
   }
 }
-void Map::set_key(char c) {
-  code = c;
-  printf("the key is '%c'\n", c);
-}
+void Map::set_key(char c) { code = c; }
 void Map::set_function(std::vector<bool> func) { function_state = func; }
 bool Map::is_valid(int x, int y) {
   return x >= 0 && y >= 0 && x < size.x && y < size.y;
@@ -221,4 +218,20 @@ glm::ivec2 Map::get_grid() {
 }
 SDL_FRect Map::get_area(glm::ivec2 pos) {
   return {pos.x * tile_size, pos.y * tile_size, tile_size, tile_size};
+}
+void Label::set_text(std::string _text) {
+  text = std::move(_text);
+  surface = TTF_RenderUTF8_Solid(font, text.c_str(), fcolor);
+  area.w = surface->w;
+  area.h = surface->h;
+}
+void Label::draw(SDL_Renderer *render, SDL_Event) {
+  if(bg!=nullptr){
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(render, bg);
+    SDL_RenderTexture(render, texture, nullptr, &area);
+    SDL_DestroyTexture(texture);
+  }
+  SDL_Texture* texture = SDL_CreateTextureFromSurface(render, surface);
+  SDL_RenderTexture(render, texture, nullptr, &area);
+  SDL_DestroyTexture(texture);
 }

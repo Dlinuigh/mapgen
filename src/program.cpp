@@ -1,8 +1,20 @@
 #include "program.h"
+#include <iostream>
+#include <format>
 void Program::create_map() {
   map = std::make_shared<Map>(map_size, tile_size, render);
   map->font = font.get_font("Terminus.ttf", 16);
-  map->fcolor = {0,0,0,255};
+  map->fcolor = {0, 0, 0, 255};
+  label_key = std::make_shared<Label>();
+  label_key->font = font.get_font("Terminus.ttf", 16);
+  label_key->fcolor = {0, 0, 0, 255};
+  label_key->set_text("c");
+  v_main->push_back(label_key, LU_CORNER);
+  label_position = std::make_shared<Label>();
+  label_position->font = font.get_font("Terminus.ttf", 16);
+  label_position->fcolor = {0, 0, 0, 255};
+  label_position->set_text("<025,250>");
+  v_main->push_back(label_position, RU_CORNER);
   v_main->push_back(map, CENTER);
   v_main->locate();
 }
@@ -46,11 +58,11 @@ void Program::create_v_main() {
   v_main->locate();
 }
 void Program::handle() {
+  // TODO 右键移动视图
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
     if (event.key.mod & SDL_KMOD_SHIFT) {
-      if (event.key.key >= (int)'a' &&
-          event.key.key <= (int)'z') {
+      if (event.key.key >= (int)'a' && event.key.key <= (int)'z') {
         code = event.key.key - 'a' + 'A';
       } else {
         switch (event.key.key) {
@@ -125,6 +137,10 @@ void Program::handle() {
       code = event.key.key;
     }
     map->set_key(code);
+    char tmp[2];
+    tmp[0]=code;
+    tmp[1]='\0';
+    label_key->set_text(tmp);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     // 点击事件由当前的view决定，使得通过添加一个view可以快速实现下拉菜单
     v_main->click();
@@ -137,10 +153,27 @@ void Program::handle() {
     v_main->locate();
   } else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
     request_quit = true;
+  } else if(event.type == SDL_EVENT_MOUSE_MOTION && map->in()){
+    glm::ivec2 mouse_position = map->get_grid();
+    std::string str_position = std::format("<{},{}>", mouse_position.x, mouse_position.y);
+    label_position->set_text(str_position);
   }
 }
 void Program::print() {
   // print the result and you can output to a file.
+  Json::Value document;
+  Json::Value m(Json::arrayValue);
+  for (int j = 0; j < map_size.x; j++) {
+    std::string line;
+    for (int i = 0; i < map_size.y; i++) {
+      line.push_back(map->data[i][j]);
+    }
+    m.append(line);
+  }
+  document["main"] = m;
+  Json::StreamWriterBuilder builder;
+  std::string output = Json::writeString(builder, document);
+  std::cout << output << std::endl;
 }
 void Program::trigger(int idx) {
   std::vector<bool> old = function;

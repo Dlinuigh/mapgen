@@ -24,6 +24,8 @@ class Program {
   std::function<void(std::vector<bool>)> set_function;
   std::vector<std::function<void()>> set_select_flag;
   std::shared_ptr<Map> map;
+  std::shared_ptr<Label> label_key;
+  std::shared_ptr<Label> label_position;
   glm::ivec2 map_size;
   std::vector<bool> function = {false, false, false, false};
   void create_map();
