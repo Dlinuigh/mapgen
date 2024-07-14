@@ -78,8 +78,9 @@ class Map : public Widget {
   SDL_Texture *map_view;
   bool begin_draw=false;
   bool already_select_one=false;
-  SDL_Color bgcolor={255,128,255,SDL_ALPHA_OPAQUE};
+  SDL_Color bgcolor={255,255,255,SDL_ALPHA_OPAQUE};
   void clear_tile(SDL_Renderer*, SDL_FRect);
+  void draw_grid(SDL_Renderer*);
 public:
   Map(glm::ivec2 _size, float tilesize, SDL_Renderer* render) : size(_size), tile_size(tilesize), graphic(Graphic::getInstance()) {
     area.w = size.x*tilesize;

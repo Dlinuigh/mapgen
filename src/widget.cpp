@@ -89,7 +89,6 @@ void Map::clear_tile(SDL_Renderer *render, SDL_FRect dst) {
   SDL_RenderFillRect(render, &dst);
 }
 void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
-  // TODO 使用背景色覆盖该单元格,对于该单元格在上面绘制grid就行。
   SDL_FRect dst = get_area(pos);
   if (function_state[2]) {
     // clear
@@ -98,6 +97,30 @@ void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
     // 对于rect可能出现，覆盖相同的tile,重绘，但是我不管。s
     clear_tile(render, dst);
     draw_char(render, dst);
+  }
+}
+void Map::draw_grid(SDL_Renderer* render){
+  for (int i = 0; i <= size.x; i++) {
+    SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    if(i%5 == 0&&i!=0&&i!=size.x){
+      SDL_SetRenderDrawColor(render, 0, 0, 255, SDL_ALPHA_OPAQUE);
+    }
+    if(i%10 == 0&&i!=0&&i!=size.x){
+      SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
+    }
+    SDL_FRect line = {tile_size*(i+1), 0, 1, tile_size*size.y};
+    SDL_RenderFillRect(render, &line);
+  }
+  for (int j = 0; j <= size.y; j++) {
+    SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    if(j%5 == 0&&j!=0&&j!=size.y){
+      SDL_SetRenderDrawColor(render, 0, 0, 255, SDL_ALPHA_OPAQUE);
+    }
+    if(j%10 == 0&&j!=0&&j!=size.y){
+      SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
+    }
+    SDL_FRect line = {0, tile_size*(j+1), tile_size*size.x, 1};
+    SDL_RenderFillRect(render, &line);
   }
 }
 void Map::draw(SDL_Renderer *render, SDL_Event) {
@@ -113,8 +136,8 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       int min_y = std::min(start_pos.y, end_pos.y);
       int max_x = std::max(start_pos.x, end_pos.x);
       int max_y = std::max(start_pos.y, end_pos.y);
-      for (int i = min_x; i < max_x; i++) {
-        for (int j = min_y; j < max_y; j++) {
+      for (int i = min_x; i <= max_x; i++) {
+        for (int j = min_y; j <= max_y; j++) {
           data[i][j] = function_state[2] ? ' ' : code;
           draw_tile(render, glm::ivec2(i, j));
         }
@@ -130,6 +153,7 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
     }
     begin_draw = false;
   }
+  draw_grid(render);
   SDL_SetRenderTarget(render, target);
   SDL_RenderTexture(render, map_view, nullptr, &area);
 }
