@@ -7,31 +7,33 @@
 
 class Font {
 private:
-  Font() {
-    TTF_Init();
-  }
+  Font() { TTF_Init(); }
+
   // Private constructor for singleton pattern
-  Font(Font const &) = delete;
-  void operator=(Font const &) = delete;
   std::map<std::pair<std::string, int>, TTF_Font *> flut;
 
 public:
+  Font(Font const &) = delete;
+
+  void operator=(Font const &) = delete;
+
   static Font &getInstance() {
     static Font instance;
     return instance;
   }
 
   TTF_Font *get_font(const std::string &_font, int fsize) {
-    auto key = std::make_pair(_font, fsize);
-    if (flut.find(key) == flut.end()) {
-      std::string ffile = std::string("../assets/font/") + _font;
+    const auto key = std::make_pair(_font, fsize);
+    if (!flut.contains(key)) {
+      const std::string ffile = std::string("../assets/font/") + _font;
       TTF_Font *font = TTF_OpenFont(ffile.c_str(), fsize);
       flut[key] = font;
     }
     return flut[key];
   }
-  ~Font(){
-    for(auto &it: flut){
+
+  ~Font() {
+    for (auto &it : flut) {
       TTF_CloseFont(it.second);
     }
   }

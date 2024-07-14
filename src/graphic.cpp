@@ -1,29 +1,32 @@
 #include "graphic.h"
 #include <SDL3_image/SDL_image.h>
 #include <iostream>
+
 void Graphic::load_images() {
-  std::string img_fold = "../assets/image/";
-  data.parse(img_fold, "image.json", image_doc);
+  const std::string img_fold = "../assets/image/";
+  Data::parse(img_fold, "image.json", image_doc);
   int i = 0;
   for (auto &it : image_doc) {
     std::string img_path = img_fold + it["file"].asString();
-    SDL_Surface *loaded_img = IMG_Load(img_path.c_str());
-    if (loaded_img == nullptr) {
+    if (SDL_Surface *loaded_img = IMG_Load(img_path.c_str());
+        loaded_img == nullptr) {
       std::cerr << "Unable to load image " << img_path
                 << "! SDL Error: " << SDL_GetError() << std::endl;
     } else {
       images[it["name"].asString()] = i; // record index to fast find.
       i++;
-      textures[it["name"].asString()] = std::move(loaded_img);
+      textures[it["name"].asString()] = loaded_img;
     }
   }
 }
+
 SDL_Surface *Graphic::get_image(const std::string &name) {
   if (images.contains(name))
     return textures[name];
   else
     return nullptr;
 }
+
 SDL_Surface *Graphic::get_tile(const std::string &name,
                                const std::string &tilename) {
   glm::ivec2 pos;
@@ -50,13 +53,14 @@ SDL_Surface *Graphic::get_tile(const std::string &name,
     return nullptr;
   }
 }
-SDL_Surface* Graphic::get_char(char key, TTF_Font* font, SDL_Color fcolor){
-  if(charmap.contains(key))
+
+SDL_Surface *Graphic::get_char(char key, TTF_Font *font, SDL_Color fcolor) {
+  if (charmap.contains(key))
     return charmap[key];
-  else{
+  else {
     char tmp[2];
-    tmp[0]=key;
-    tmp[1]='\0';
+    tmp[0] = key;
+    tmp[1] = '\0';
     charmap[key] = TTF_RenderUTF8_Solid(font, tmp, fcolor);
     return charmap[key];
   }

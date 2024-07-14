@@ -1,6 +1,7 @@
 #include "program.h"
 #include <format>
 #include <iostream>
+
 void Program::create_map() {
   map = std::make_shared<Map>(map_size, tile_size, render);
   map->font = font.get_font("Terminus.ttf", 16);
@@ -17,6 +18,7 @@ void Program::create_map() {
   v_main->push_back(label_position, RU_CORNER);
   v_main->push_back(map, CENTER);
 }
+
 void Program::create_v_main() {
   v_main = std::make_shared<View>(scr_size);
   create_map();
@@ -35,16 +37,16 @@ void Program::create_v_main() {
   eraser->set_desire_size(enlarge_tile);
   bucket->set_desire_size(enlarge_tile);
   save->set_desire_size(enlarge_tile);
-  point->callback = std::bind(&Program::trigger, this, 0);
-  rect->callback = std::bind(&Program::trigger, this, 1);
-  eraser->callback = std::bind(&Program::trigger, this, 2);
-  bucket->callback = std::bind(&Program::trigger, this, 3);
-  save->callback = std::bind(&Program::print, this);
-  set_select_flag.push_back(std::bind(&Check::activate, point));
-  set_select_flag.push_back(std::bind(&Check::activate, rect));
-  set_select_flag.push_back(std::bind(&Check::activate, eraser));
-  set_select_flag.push_back(std::bind(&Check::activate, bucket));
-  auto panel = std::make_shared<Box>(false);
+  point->callback = [this] { trigger(0); };
+  rect->callback = [this] { trigger(1); };
+  eraser->callback = [this] { trigger(2); };
+  bucket->callback = [this] { trigger(3); };
+  save->callback = [this] { print(); };
+  set_select_flag.emplace_back([point] { point->activate(); });
+  set_select_flag.emplace_back([rect] { rect->activate(); });
+  set_select_flag.emplace_back([eraser] { eraser->activate(); });
+  set_select_flag.emplace_back([bucket] { bucket->activate(); });
+  const auto panel = std::make_shared<Box>(false);
   panel->push_back(point);
   panel->push_back(rect);
   panel->push_back(eraser);
@@ -56,12 +58,14 @@ void Program::create_v_main() {
   // 整理位置
   v_main->locate();
 }
+
 void Program::handle() {
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
     if (event.key.mod & SDL_KMOD_SHIFT) {
-      if (event.key.key >= (int)'a' && event.key.key <= (int)'z') {
-        code = event.key.key - 'a' + 'A';
+      if (event.key.key >= static_cast<int>('a') &&
+          event.key.key <= static_cast<int>('z')) {
+        code = static_cast<char>(event.key.key - 'a' + 'A');
       } else {
         switch (event.key.key) {
         case '`':
@@ -127,12 +131,13 @@ void Program::handle() {
         case '/':
           code = '?';
           break;
+        default:;
         }
       }
     } else if (event.key.mod & SDL_KMOD_CAPS) {
-      code = event.key.key - 'a' + 'A';
+      code = static_cast<char>(event.key.key - 'a' + 'A');
     } else {
-      code = event.key.key;
+      code = static_cast<char>(event.key.key);
     }
     map->set_key(code);
     char tmp[2];
@@ -155,12 +160,11 @@ void Program::handle() {
   } else if (event.type == SDL_EVENT_MOUSE_MOTION && map->in() &&
              !right_button_down) {
     glm::ivec2 mouse_position = map->get_grid();
-    std::string str_position =
+    const std::string str_position =
         std::format("<{},{}>", mouse_position.x, mouse_position.y);
     label_position->set_text(str_position);
-  }
-  else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
-           event.button.button == SDL_BUTTON_RIGHT) {
+  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+             event.button.button == SDL_BUTTON_RIGHT) {
     right_button_down = true;
     SDL_GetMouseState(&right_button_position.x, &right_button_position.y);
     map_old_position.x = map->area.x;
@@ -177,7 +181,8 @@ void Program::handle() {
     right_button_down = false;
   }
 }
-void Program::print() {
+
+void Program::print() const {
   // print the result and you can output to a file.
   Json::Value document;
   Json::Value m(Json::arrayValue);
@@ -190,10 +195,11 @@ void Program::print() {
   }
   document["main"] = m;
   Json::StreamWriterBuilder builder;
-  std::string output = Json::writeString(builder, document);
+  const std::string output = Json::writeString(builder, document);
   std::cout << output << std::endl;
 }
-void Program::trigger(int idx) {
+
+void Program::trigger(const int idx) {
   std::vector<bool> old = function;
   switch (idx) {
   case 0: {
@@ -233,7 +239,8 @@ void Program::trigger(int idx) {
       set_select_flag[i]();
   }
 }
-void Program::draw() {
+
+void Program::draw() const {
   SDL_SetRenderTarget(render, view);
   SDL_SetRenderDrawColor(render, 255, 255, 255, 255);
   SDL_RenderClear(render);
@@ -242,15 +249,18 @@ void Program::draw() {
   SDL_RenderTexture(render, view, nullptr, nullptr);
   SDL_RenderPresent(render);
 }
-bool Program::is_quit(SDL_Event event) {
+
+bool Program::is_quit(const SDL_Event &event) {
   return (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_Q &&
           event.key.mod & SDL_KMOD_CTRL);
 }
+
 void Program::init() {
   window =
       SDL_CreateWindow("Program", scr_size.x, scr_size.y, SDL_WINDOW_RESIZABLE);
   render = SDL_CreateRenderer(window, nullptr);
 }
+
 void Program::set_view() {
   if (view != nullptr) {
     SDL_DestroyTexture(view);
@@ -258,6 +268,7 @@ void Program::set_view() {
   view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
                            SDL_TEXTUREACCESS_TARGET, scr_size.x, scr_size.y);
 }
+
 void Program::run() {
   do {
     handle();

@@ -1,4 +1,8 @@
 #include "view.h"
+
+#include <algorithm>
+#include <ranges>
+
 void Box::push_back(const std::shared_ptr<Widget> &child) {
   children.push_back(child);
   // 获取组件的最小大小要求
@@ -12,29 +16,28 @@ void Box::push_back(const std::shared_ptr<Widget> &child) {
       child_size.y = child->area.h;
   }
 }
+
 bool Box::click() {
   if (in()) {
-    for (const auto &it : children) {
-      if (it->click()) {
-        return true;
-      }
-    }
+    return std::ranges::any_of(children, [](auto it) { return it->click(); });
   }
   return false;
 }
-void Box::draw(SDL_Renderer *render, SDL_Event event) {
+
+void Box::draw(SDL_Renderer *render, const SDL_Event event) {
   if (bg != nullptr) {
-    draw(render, event);
+    Widget::draw(render, event);
   }
   for (const auto &it : children) {
     it->draw(render, event);
   }
 }
+
 void Box::set_size() {
   // 设置box的大小，但是似乎不能整理孩子的大小。
   if (vertical) {
     area.w = child_size.x;
-    for (auto &it : children) {
+    for (const auto &it : children) {
       area.h += it->area.h;
     }
     // for(auto &it: children){
@@ -42,7 +45,7 @@ void Box::set_size() {
     // }
   } else {
     area.h = child_size.y;
-    for (auto &it : children) {
+    for (const auto &it : children) {
       area.w += it->area.w;
     }
     // for(auto &it: children){
@@ -50,11 +53,12 @@ void Box::set_size() {
     // }
   }
 }
+
 void Box::locate(glm::fvec2 position) {
   area.x = position.x;
   area.y = position.y;
   glm::fvec2 offset = position;
-  for (auto &it : children) {
+  for (const auto &it : children) {
     if (vertical) {
       it->locate({position.x, offset.y});
       offset.y += it->area.h;
@@ -64,23 +68,28 @@ void Box::locate(glm::fvec2 position) {
     }
   }
 }
+
 // 该函数只能是子组件的大小被准确的确定了才能调用
 void View::push_back(const std::shared_ptr<Widget> &child, Position position) {
   // emplace可以避免使用构造makepair,而是直接在向量末尾进行内存上的构造。
   children.emplace_back(child, position);
 }
-void View::locate(){
-  for(auto &it: children){
-    locate_child(it.first, it.second);
+
+void View::locate() {
+  for (auto &[fst, snd] : children) {
+    locate_child(fst, snd);
   }
 }
-void View::locate_child(const std::shared_ptr<Widget> &child, Position position){
+
+void View::locate_child(const std::shared_ptr<Widget> &child,
+                        const Position position) {
   // 根据大小与相对位置确定绝对位置
-  glm::fvec2 pos;
-  glm::fvec2 rd_corner_pos = {scr_size.x - child->area.w,
-                              scr_size.y - child->area.h};
-  glm::fvec2 c_lu_cor_pos = {scr_size.x / 2.0f - child->area.w / 2,
-                             scr_size.y / 2.0f - child->area.h / 2};
+  glm::fvec2 pos = {};
+  glm::fvec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
+                              static_cast<float>(scr_size.y) - child->area.h};
+  glm::fvec2 c_lu_cor_pos = {
+      static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
+      static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
   switch (position) {
   case LU_CORNER:
     pos = {0, 0};
@@ -112,16 +121,14 @@ void View::locate_child(const std::shared_ptr<Widget> &child, Position position)
   }
   child->locate(pos);
 }
+
 bool View::click() {
-  for (const auto &it : children) {
-    if (it.first->click()) {
-      return true;
-    }
-  }
-  return false;
+  return std::ranges::any_of(children,
+                             [](auto it) { return it.first->click(); });
 }
-void View::draw(SDL_Renderer* render, SDL_Event event){
-  for(auto &it: children){
-    it.first->draw(render, event);
+
+void View::draw(SDL_Renderer *render, const SDL_Event event) {
+  for (const auto &child : children | std::ranges::views::keys) {
+    child->draw(render, event);
   }
 }
