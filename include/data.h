@@ -3,9 +3,6 @@
 #include <json/json.h>
 
 class Data {
-  // map data store in a dim 2 char.
-  // std::vector<std::vector<char>> map;
-  // single instance
   Data() = default;
 
 public:

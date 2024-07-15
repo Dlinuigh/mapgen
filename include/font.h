@@ -9,7 +9,6 @@ class Font {
 private:
   Font() { TTF_Init(); }
 
-  // Private constructor for singleton pattern
   std::map<std::pair<std::string, int>, TTF_Font *> flut;
 
 public:

@@ -69,9 +69,7 @@ void Box::locate(glm::fvec2 position) {
   }
 }
 
-// 该函数只能是子组件的大小被准确的确定了才能调用
 void View::push_back(const std::shared_ptr<Widget> &child, Position position) {
-  // emplace可以避免使用构造makepair,而是直接在向量末尾进行内存上的构造。
   children.emplace_back(child, position);
 }
 

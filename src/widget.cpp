@@ -18,6 +18,7 @@ bool Widget::click() {
 void Widget::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
   SDL_RenderTexture(render, texture, nullptr, &area);
+  SDL_DestroyTexture(texture);
 }
 
 void Widget::resize(float length, bool horizon) {
@@ -40,7 +41,12 @@ void Widget::set_desire_size(glm::fvec2 size) {
   area.h = size.y;
 }
 
-void Check::set_check_texture(SDL_Surface *surface) { check_sign = surface; }
+void Check::set_check_texture(SDL_Surface *surface) {
+  if (check_sign != nullptr) {
+    SDL_DestroySurface(check_sign);
+  }
+  check_sign = surface;
+}
 
 void Check::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
@@ -79,6 +85,9 @@ bool Cell::click() {
 }
 
 void Cell::draw(SDL_Renderer *render, SDL_Event) {
+  if (bg != nullptr) {
+    SDL_DestroySurface(bg);
+  }
   bg = TTF_RenderUTF8_Solid(font, &value, fcolor);
   const auto w = static_cast<float>(bg->w);
   const auto h = static_cast<float>(bg->h);
@@ -108,10 +117,8 @@ void Map::clear_tile(SDL_Renderer *render, const SDL_FRect dst) const {
 void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
   const SDL_FRect dst = get_area(pos);
   if (function_state[2]) {
-    // clear
     clear_tile(render, dst);
   } else {
-    // 对于rect可能出现，覆盖相同的tile,重绘，但是我不管。s
     clear_tile(render, dst);
     draw_char(render, dst);
   }
@@ -257,6 +264,9 @@ SDL_FRect Map::get_area(const glm::ivec2 pos) const {
 
 void Label::set_text(std::string _text) {
   text = std::move(_text);
+  if(surface!=nullptr){
+    SDL_DestroySurface(surface);
+  }
   surface = TTF_RenderUTF8_Solid(font, text.c_str(), fcolor);
   area.w = static_cast<float>(surface->w);
   area.h = static_cast<float>(surface->h);

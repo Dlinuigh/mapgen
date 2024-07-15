@@ -9,14 +9,14 @@
 class Widget {
 public:
   std::function<void()> callback = nullptr; // 点击触发的函数
-  SDL_FRect area;   // 绝对区域,该位置需要后续的计算进行调整
-  TTF_Font *font;   // 来自game管理的字体
-  SDL_Color fcolor; // 字体颜色
-  SDL_Surface *bg;  // 背景图片
+  SDL_FRect area={};   // 绝对区域,该位置需要后续的计算进行调整
+  TTF_Font *font=nullptr;   // 来自game管理的字体
+  SDL_Color fcolor={}; // 字体颜色
+  SDL_Surface *bg=nullptr;  // 背景图片
   float ratio = 1.0f;
   // w/h的比例，用来保持长宽比例地缩放，这个时候总有一个变量不需要统一
   // 还有一点：缩放后不会进行拉伸，要不然会导致变形
-  Widget() : area({}), font(nullptr), fcolor({}), bg(nullptr) {}
+  Widget()=default;
 
   virtual ~Widget() { SDL_DestroySurface(bg); }
 

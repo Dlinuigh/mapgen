@@ -55,6 +55,7 @@ SDL_Surface *Graphic::get_tile(const std::string &name,
 }
 
 SDL_Surface *Graphic::get_char(char key, TTF_Font *font, SDL_Color fcolor) {
+  // FIXME 如果字符相同不会考虑字体、字体颜色
   if (charmap.contains(key))
     return charmap[key];
   else {
