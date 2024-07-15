@@ -83,7 +83,8 @@ class Map final : public Widget {
   glm::ivec2 size;
   glm::ivec2 start_pos;
   glm::ivec2 end_pos;
-  std::vector<bool> function_state = {false, false, false, false}; // 0,1,2,3
+  bool left_button_down;
+  std::vector<bool> function_state = {false, false, false, false, false}; // 0,1,2,3
   float tile_size;
   Graphic &graphic;
 
@@ -92,8 +93,6 @@ class Map final : public Widget {
   void dfs(int, int, std::vector<glm::ivec2> &adj_set, char target);
 
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
-
-  void draw_tile(SDL_Renderer *, glm::ivec2);
 
   void draw_char(SDL_Renderer *, SDL_FRect) const;
 
@@ -125,7 +124,7 @@ public:
     SDL_RenderClear(render);
     SDL_SetRenderTarget(render, texture);
   }
-
+  void draw_tile(SDL_Renderer *, glm::ivec2);
   [[nodiscard]] glm::ivec2 get_grid() const;
 
   void draw(SDL_Renderer *, SDL_Event) override;

@@ -27,17 +27,30 @@ void Program::create_v_main() {
   auto eraser = std::make_shared<Check>(graphic.get_tile("tool", "eraser"));
   auto bucket = std::make_shared<Check>(graphic.get_tile("tool", "bucket"));
   const auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"));
-  // FIXME 下面的四个surface都发生了leak
+  auto free_paint = std::make_shared<Check>(graphic.get_tile("tool", "free"));
+  auto circle = std::make_shared<Check>(graphic.get_tile("tool", "circle"));
+  auto box = std::make_shared<Check>(graphic.get_tile("tool", "box"));
+  auto line = std::make_shared<Check>(graphic.get_tile("tool", "line"));
+  auto saw = std::make_shared<Check>(graphic.get_tile("tool", "saw"));
+  auto choose = std::make_shared<Check>(graphic.get_tile("tool", "choose"));
+  auto move = std::make_shared<Check>(graphic.get_tile("tool", "move"));
   point->set_check_texture(graphic.get_tile("tool", "select"));
   rect->set_check_texture(graphic.get_tile("tool", "select"));
   eraser->set_check_texture(graphic.get_tile("tool", "select"));
   bucket->set_check_texture(graphic.get_tile("tool", "select"));
-   constexpr glm::fvec2 enlarge_tile(64, 64);
+  constexpr glm::fvec2 enlarge_tile(32, 32);
   point->set_desire_size(enlarge_tile);
   rect->set_desire_size(enlarge_tile);
   eraser->set_desire_size(enlarge_tile);
   bucket->set_desire_size(enlarge_tile);
   save->set_desire_size(enlarge_tile);
+  free_paint->set_desire_size(enlarge_tile);
+  circle->set_desire_size(enlarge_tile);
+  box->set_desire_size(enlarge_tile);
+  line->set_desire_size(enlarge_tile);
+  saw->set_desire_size(enlarge_tile);
+  choose->set_desire_size(enlarge_tile);
+  move->set_desire_size(enlarge_tile);
   point->callback = [this] { trigger(0); };
   rect->callback = [this] { trigger(1); };
   eraser->callback = [this] { trigger(2); };
@@ -47,12 +60,26 @@ void Program::create_v_main() {
   set_select_flag.emplace_back([rect] { rect->activate(); });
   set_select_flag.emplace_back([eraser] { eraser->activate(); });
   set_select_flag.emplace_back([bucket] { bucket->activate(); });
+  set_select_flag.emplace_back([free_paint] { free_paint->activate(); });
+  set_select_flag.emplace_back([circle] { circle->activate(); });
+  set_select_flag.emplace_back([box] { box->activate(); });
+  set_select_flag.emplace_back([line] { line->activate(); });
+  set_select_flag.emplace_back([saw] { saw->activate(); });
+  set_select_flag.emplace_back([choose] { choose->activate(); });
+  set_select_flag.emplace_back([move] { move->activate(); });
   const auto panel = std::make_shared<Box>(false);
   panel->push_back(point);
   panel->push_back(rect);
   panel->push_back(eraser);
   panel->push_back(bucket);
   panel->push_back(save);
+  panel->push_back(free_paint);
+  panel->push_back(circle);
+  panel->push_back(box);
+  panel->push_back(line);
+  panel->push_back(saw);
+  panel->push_back(choose);
+  panel->push_back(move);
   // 整理大小
   panel->set_size();
   v_main->push_back(panel, U_SIDE);
@@ -147,10 +174,8 @@ void Program::handle() {
     label_key->set_text(tmp);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
              event.button.button == SDL_BUTTON_LEFT) {
-    // 点击事件由当前的view决定，使得通过添加一个view可以快速实现下拉菜单
     v_main->click();
   } else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-    // 更新画布的大小
     scr_size.x = event.window.data1;
     scr_size.y = event.window.data2;
     set_view();
@@ -167,16 +192,16 @@ void Program::handle() {
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
              event.button.button == SDL_BUTTON_RIGHT) {
     right_button_down = true;
-    SDL_GetMouseState(&right_button_position.x, &right_button_position.y);
+    SDL_GetMouseState(&button_position.x, &button_position.y);
     map_old_position.x = map->area.x;
     map_old_position.y = map->area.y;
   } else if (event.type == SDL_EVENT_MOUSE_MOTION && right_button_down) {
     glm::fvec2 tmp_position;
     SDL_GetMouseState(&tmp_position.x, &tmp_position.y);
     map->area.x =
-        map_old_position.x + (tmp_position.x - right_button_position.x);
+        map_old_position.x + (tmp_position.x - button_position.x);
     map->area.y =
-        map_old_position.y + (tmp_position.y - right_button_position.y);
+        map_old_position.y + (tmp_position.y - button_position.y);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
              event.button.button == SDL_BUTTON_RIGHT) {
     right_button_down = false;
@@ -231,6 +256,13 @@ void Program::trigger(const int idx) {
     function[3].flip();
     break;
   }
+  case 4:{}
+  case 5:{}
+  case 6:{}
+  case 7:{}
+  case 8:{}
+  case 9:{}
+  case 10:{}
   default:;
   }
   map->set_function(function);
@@ -253,7 +285,7 @@ void Program::draw() const {
 
 bool Program::is_quit(const SDL_Event &event) {
   return event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_Q &&
-          event.key.mod & SDL_KMOD_CTRL;
+         event.key.mod & SDL_KMOD_CTRL;
 }
 
 void Program::init() {

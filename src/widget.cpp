@@ -41,9 +41,7 @@ void Widget::set_desire_size(const glm::fvec2 size) {
   area.h = size.y;
 }
 
-void Check::set_check_texture(SDL_Surface *surface) {
-  check_sign = surface;
-}
+void Check::set_check_texture(SDL_Surface *surface) { check_sign = surface; }
 
 void Check::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
@@ -148,7 +146,7 @@ void Map::draw_grid(SDL_Renderer *render) const {
   }
 }
 
-void Map::draw(SDL_Renderer *render, SDL_Event) {
+void Map::draw(SDL_Renderer *render, SDL_Event event) {
   SDL_Texture *target = SDL_GetRenderTarget(render);
   SDL_SetRenderTarget(render, map_view);
   if (begin_draw) {
@@ -174,6 +172,17 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       dfs(start_pos.x, start_pos.y, adj_set, find_this_same);
       for (const auto &it : adj_set) {
         draw_tile(render, it);
+      }
+    } else if (function_state[4]) {
+      if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+          event.button.button == SDL_BUTTON_LEFT) {
+        left_button_down = true;
+      } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
+                 event.button.button == SDL_BUTTON_RIGHT) {
+        left_button_down = false;
+      } else if (event.type == SDL_EVENT_MOUSE_MOTION && left_button_down) {
+        glm::ivec2 pos = get_grid();
+        draw_tile(render, pos);
       }
     }
     begin_draw = false;
@@ -261,7 +270,7 @@ SDL_FRect Map::get_area(const glm::ivec2 pos) const {
 
 void Label::set_text(std::string _text) {
   text = std::move(_text);
-  if(surface!=nullptr){
+  if (surface != nullptr) {
     SDL_DestroySurface(surface);
   }
   surface = TTF_RenderUTF8_Solid(font, text.c_str(), fcolor);

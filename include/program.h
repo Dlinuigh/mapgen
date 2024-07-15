@@ -27,11 +27,12 @@ class Program {
   std::shared_ptr<Map> map;
   std::shared_ptr<Label> label_key;
   std::shared_ptr<Label> label_position;
-  glm::fvec2 right_button_position{};
+  glm::fvec2 button_position{};
   bool right_button_down = false;
+  bool left_button_down = false;
   glm::fvec2 map_old_position{};
   glm::ivec2 map_size{};
-  std::vector<bool> function = {false, false, false, false};
+  std::vector<bool> function = {false, false, false, false, false};
 
   void create_map();
 

@@ -21,3 +21,24 @@
     -
       name: select
       pos: [0,1]
+    -
+      name: free
+      pos: [1,1]
+    -
+      name: circle
+      pos: [2,1]
+    -
+      name: box
+      pos: [3,1]
+    -
+      name: line
+      pos: [4,1]
+    -
+      name: saw
+      pos: [0,2]
+    -
+      name: choose
+      pos: [1,2]
+    -
+      name: move
+      pos: [2,2]
