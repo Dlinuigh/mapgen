@@ -32,7 +32,7 @@ class Program {
   bool left_button_down = false;
   glm::fvec2 map_old_position{};
   glm::ivec2 map_size{};
-  std::vector<bool> function = {false, false, false, false, false};
+  std::vector<bool> function = std::vector(11, false);
 
   void create_map();
 

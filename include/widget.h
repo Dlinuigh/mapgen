@@ -9,16 +9,16 @@
 class Widget {
 public:
   std::function<void()> callback = nullptr; // 点击触发的函数
-  SDL_FRect area={};   // 绝对区域,该位置需要后续的计算进行调整
-  TTF_Font *font=nullptr;   // 来自game管理的字体
-  SDL_Color fcolor={}; // 字体颜色
-  SDL_Surface *bg=nullptr;  // 背景图片
+  SDL_FRect area = {}; // 绝对区域,该位置需要后续的计算进行调整
+  TTF_Font *font = nullptr;  // 来自game管理的字体
+  SDL_Color fcolor = {};     // 字体颜色
+  SDL_Surface *bg = nullptr; // 背景图片
   float ratio = 1.0f;
   // w/h的比例，用来保持长宽比例地缩放，这个时候总有一个变量不需要统一
   // 还有一点：缩放后不会进行拉伸，要不然会导致变形
-  Widget()=default;
+  Widget() = default;
 
-  virtual ~Widget()=default;
+  virtual ~Widget() = default;
   // 函数用来将内容绘制到texture上，并且不会获取任何texture的信息，只是复制。
   virtual void draw(SDL_Renderer *, SDL_Event);
 
@@ -39,7 +39,7 @@ public:
 
 class Check final : public Widget {
   bool activated = false;
-  SDL_Surface *check_sign=nullptr;
+  SDL_Surface *check_sign = nullptr;
 
 public:
   explicit Check(SDL_Surface *surface) {
@@ -59,7 +59,6 @@ public:
   void draw(SDL_Renderer *render, SDL_Event) override;
 
   bool click() override;
-
 };
 
 class Cell final : public Widget {
@@ -84,9 +83,10 @@ class Map final : public Widget {
   glm::ivec2 start_pos;
   glm::ivec2 end_pos;
   bool left_button_down;
-  std::vector<bool> function_state = {false, false, false, false, false}; // 0,1,2,3
+  std::vector<bool> function_state = std::vector(11, false); // 0,1,2,3
   float tile_size;
   Graphic &graphic;
+  SDL_Texture *grid;
 
   [[nodiscard]] bool is_valid(int, int) const;
 
@@ -105,6 +105,8 @@ class Map final : public Widget {
 
   void draw_grid(SDL_Renderer *) const;
 
+  void generate_grid(SDL_Renderer *) const;
+
 public:
   std::vector<std::vector<char>> data;
 
@@ -118,10 +120,20 @@ public:
     map_view = SDL_CreateTexture(
         render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET,
         static_cast<int>(area.w), static_cast<int>(area.h));
-    SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
+    grid = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
+                             SDL_TEXTUREACCESS_TARGET, static_cast<int>(area.w),
+                             static_cast<int>(area.h));
+    SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, SDL_ALPHA_TRANSPARENT);
+    SDL_SetTextureBlendMode(map_view, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(grid, SDL_BLENDMODE_BLEND);
     SDL_Texture *texture = SDL_GetRenderTarget(render);
     SDL_SetRenderTarget(render, map_view);
     SDL_RenderClear(render);
+    // SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
+    SDL_SetRenderTarget(render, grid);
+    SDL_RenderClear(render);
+    // function below will set target.
+    generate_grid(render);
     SDL_SetRenderTarget(render, texture);
   }
   void draw_tile(SDL_Renderer *, glm::ivec2);
@@ -137,7 +149,10 @@ public:
   // 功能的修改需要调用一次
   void set_function(const std::vector<bool> &func);
 
-  ~Map() override { SDL_DestroyTexture(map_view); }
+  ~Map() override {
+    SDL_DestroyTexture(map_view);
+    SDL_DestroyTexture(grid);
+  }
 };
 
 class Label final : public Widget {

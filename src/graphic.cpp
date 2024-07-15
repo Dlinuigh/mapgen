@@ -33,7 +33,7 @@ SDL_Surface *Graphic::get_tile(const std::string &name,
       Json::Value img = image_doc[images[name]]; // the png image.
       cached_png_name = name;
       tileset.clear();
-      for(auto &it:tilemap){
+      for (auto &it : tilemap) {
         SDL_DestroySurface(it.second);
       }
       size = img["size"].asInt();

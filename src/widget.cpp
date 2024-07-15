@@ -119,7 +119,8 @@ void Map::draw_tile(SDL_Renderer *render, const glm::ivec2 pos) {
   }
 }
 
-void Map::draw_grid(SDL_Renderer *render) const {
+void Map::generate_grid(SDL_Renderer *render) const {
+  SDL_SetRenderTarget(render, grid);
   for (int i = 0; i <= size.x; i++) {
     SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
     if (i % 5 == 0 && i != 0 && i != size.x) {
@@ -128,22 +129,14 @@ void Map::draw_grid(SDL_Renderer *render) const {
     if (i % 10 == 0 && i != 0 && i != size.x) {
       SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
     }
-    SDL_FRect line = {tile_size * static_cast<float>(i + 1), 0, 1,
-                      tile_size * static_cast<float>(size.y)};
-    SDL_RenderFillRect(render, &line);
+    float x = tile_size * (i + 1);
+    SDL_RenderLine(render, x, 0, x, area.h);
+    SDL_RenderLine(render, 0, x, area.w, x);
   }
-  for (int j = 0; j <= size.y; j++) {
-    SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    if (j % 5 == 0 && j != 0 && j != size.y) {
-      SDL_SetRenderDrawColor(render, 0, 0, 255, SDL_ALPHA_OPAQUE);
-    }
-    if (j % 10 == 0 && j != 0 && j != size.y) {
-      SDL_SetRenderDrawColor(render, 255, 0, 255, SDL_ALPHA_OPAQUE);
-    }
-    SDL_FRect line = {0, tile_size * static_cast<float>(j + 1),
-                      tile_size * static_cast<float>(size.x), 1};
-    SDL_RenderFillRect(render, &line);
-  }
+}
+void Map::draw_grid(SDL_Renderer *render) const {
+  // 不是用texture会导致性能下降
+  SDL_RenderTexture(render, grid, nullptr, &area);
 }
 
 void Map::draw(SDL_Renderer *render, SDL_Event event) {
@@ -187,9 +180,9 @@ void Map::draw(SDL_Renderer *render, SDL_Event event) {
     }
     begin_draw = false;
   }
-  draw_grid(render);
   SDL_SetRenderTarget(render, target);
   SDL_RenderTexture(render, map_view, nullptr, &area);
+  draw_grid(render);
 }
 
 bool Map::click() {

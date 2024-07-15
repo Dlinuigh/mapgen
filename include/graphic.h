@@ -1,15 +1,15 @@
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
 #include "data.h"
-#include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <glm/glm.hpp>
 #include <map>
 #include <string>
 class Graphic {
   std::map<std::string, SDL_Surface *> textures;
   std::map<char, SDL_Surface *> charmap;
-  std::map<std::string, SDL_Surface*> tilemap;
+  std::map<std::string, SDL_Surface *> tilemap;
   Json::Value image_doc = {};
   std::map<std::string, glm::ivec2> tileset = {};
   std::string cached_png_name = {};
@@ -37,7 +37,7 @@ public:
     for (auto &it : textures) {
       SDL_DestroySurface(it.second);
     }
-    for(auto &it : tilemap){
+    for (auto &it : tilemap) {
 
       SDL_DestroySurface(it.second);
     }

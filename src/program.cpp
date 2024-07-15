@@ -10,13 +10,13 @@ void Program::create_map() {
   label_key->font = font.get_font("Terminus.ttf", 16);
   label_key->fcolor = {0, 0, 0, 255};
   label_key->set_text(" ");
-  v_main->push_back(label_key, LU_CORNER);
+  v_main->push_back(label_key, LU_CORNER,1,1);
   label_position = std::make_shared<Label>();
   label_position->font = font.get_font("Terminus.ttf", 16);
   label_position->fcolor = {0, 0, 0, 255};
   label_position->set_text("<025,520>");
-  v_main->push_back(label_position, RU_CORNER);
-  v_main->push_back(map, CENTER);
+  v_main->push_back(label_position, RU_CORNER, 2, 2);
+  v_main->push_back(map, CENTER, 3, 0);
 }
 
 void Program::create_v_main() {
@@ -38,6 +38,13 @@ void Program::create_v_main() {
   rect->set_check_texture(graphic.get_tile("tool", "select"));
   eraser->set_check_texture(graphic.get_tile("tool", "select"));
   bucket->set_check_texture(graphic.get_tile("tool", "select"));
+  free_paint->set_check_texture(graphic.get_tile("tool", "select"));
+  circle->set_check_texture(graphic.get_tile("tool", "select"));
+  box->set_check_texture(graphic.get_tile("tool", "select"));
+  line->set_check_texture(graphic.get_tile("tool", "select"));
+  saw->set_check_texture(graphic.get_tile("tool", "select"));
+  choose->set_check_texture(graphic.get_tile("tool", "select"));
+  move->set_check_texture(graphic.get_tile("tool", "select"));
   constexpr glm::fvec2 enlarge_tile(32, 32);
   point->set_desire_size(enlarge_tile);
   rect->set_desire_size(enlarge_tile);
@@ -56,6 +63,13 @@ void Program::create_v_main() {
   eraser->callback = [this] { trigger(2); };
   bucket->callback = [this] { trigger(3); };
   save->callback = [this] { print(); };
+  free_paint->callback = [this] { trigger(4); };
+  circle->callback = [this] { trigger(5); };
+  box->callback = [this] { trigger(6); };
+  line->callback = [this] { trigger(7); };
+  saw->callback = [this] { trigger(8); };
+  choose->callback = [this] { trigger(9); };
+  move->callback = [this] { trigger(10); };
   set_select_flag.emplace_back([point] { point->activate(); });
   set_select_flag.emplace_back([rect] { rect->activate(); });
   set_select_flag.emplace_back([eraser] { eraser->activate(); });
@@ -82,7 +96,7 @@ void Program::create_v_main() {
   panel->push_back(move);
   // 整理大小
   panel->set_size();
-  v_main->push_back(panel, U_SIDE);
+  v_main->push_back(panel, U_SIDE, 0,3);
   // 整理位置
   v_main->locate();
 }
@@ -198,10 +212,8 @@ void Program::handle() {
   } else if (event.type == SDL_EVENT_MOUSE_MOTION && right_button_down) {
     glm::fvec2 tmp_position;
     SDL_GetMouseState(&tmp_position.x, &tmp_position.y);
-    map->area.x =
-        map_old_position.x + (tmp_position.x - button_position.x);
-    map->area.y =
-        map_old_position.y + (tmp_position.y - button_position.y);
+    map->area.x = map_old_position.x + (tmp_position.x - button_position.x);
+    map->area.y = map_old_position.y + (tmp_position.y - button_position.y);
   } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
              event.button.button == SDL_BUTTON_RIGHT) {
     right_button_down = false;
@@ -256,17 +268,38 @@ void Program::trigger(const int idx) {
     function[3].flip();
     break;
   }
-  case 4:{}
-  case 5:{}
-  case 6:{}
-  case 7:{}
-  case 8:{}
-  case 9:{}
-  case 10:{}
+  case 4: {
+    function[4].flip();
+    break;
+  }
+  case 5: {
+    function[5].flip();
+    break;
+  }
+  case 6: {
+    function[6].flip();
+    break;
+  }
+  case 7: {
+    function[7].flip();
+    break;
+  }
+  case 8: {
+    function[8].flip();
+    break;
+  }
+  case 9: {
+    function[9].flip();
+    break;
+  }
+  case 10: {
+    function[10].flip();
+    break;
+  }
   default:;
   }
   map->set_function(function);
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 11; i++) {
     if ((old[i] == false && function[i] == true) ||
         (old[i] == true && function[i] == false))
       set_select_flag[i]();

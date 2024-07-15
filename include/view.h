@@ -3,11 +3,12 @@
 #include "utils.h"
 #include "widget.h"
 #include <memory>
+#include <tuple>
 #include <vector>
 
 class Box final : public Widget {
   std::vector<std::shared_ptr<Widget>> children;
-  bool vertical=false; // 竖直排列？
+  bool vertical = false; // 竖直排列？
   glm::fvec2 child_size = {0, 0};
 
 public:
@@ -23,20 +24,34 @@ public:
 
   void locate(glm::fvec2 position) override;
 };
-
+struct Compare {
+  const int column = 0;
+  Compare(int col) : column(col) {}
+  bool operator()(
+      const std::tuple<int, int, std::shared_ptr<Widget>, Position> &row_1,
+      const std::tuple<int, int, std::shared_ptr<Widget>, Position> &row_2) {
+    if (column == 0)
+      return std::get<0>(row_1) < std::get<0>(row_2);
+    if (column == 1)
+      return std::get<1>(row_1) < std::get<1>(row_2);
+    return false;
+  }
+};
 class View final {
-  void locate_child(const std::shared_ptr<Widget> &child, Position position)const;
+  void locate_child(const std::shared_ptr<Widget> &child,
+                    Position position) const;
 
   glm::ivec2 scr_size;
 
 public:
   explicit View(glm::ivec2 _size) : scr_size(_size) {}
 
-  std::vector<std::pair<std::shared_ptr<Widget>, Position>> children;
+  std::vector<std::tuple<int, int, std::shared_ptr<Widget>, Position>> children;
+  // 支持多个优先级的
 
   bool click();
 
-  void push_back(const std::shared_ptr<Widget> &child, Position position);
+  void push_back(const std::shared_ptr<Widget> &, Position, int, int);
 
   void draw(SDL_Renderer *render, const SDL_Event &event);
 
