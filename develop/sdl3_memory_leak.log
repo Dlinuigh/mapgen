@@ -1,0 +1,324 @@
+
+=================================================================
+==3943==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 2688 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af50fd087f  (<unknown module>)
+    #2 0x77af50fd0f5f  (<unknown module>)
+    #3 0x77af52db38f4  (<unknown module>)
+
+Direct leak of 2560 byte(s) in 4 object(s) allocated from:
+    #0 0x77af552fb6e2 in realloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x77af539d110b  (/usr/lib/libfontconfig.so.1+0x2110b) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Direct leak of 264 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f9c08b in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c08b) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #6 0x5c380d64c207 in Program::create_v_main() ../src/program.cpp:30
+    #7 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #8 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #9 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #10 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 264 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f9c08b in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c08b) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #6 0x5c380d64c3a9 in Program::create_v_main() ../src/program.cpp:31
+    #7 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #8 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #9 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #10 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 264 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f9c08b in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c08b) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #6 0x5c380d64c6e4 in Program::create_v_main() ../src/program.cpp:33
+    #7 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #8 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #9 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #10 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 264 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f9c08b in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c08b) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #6 0x5c380d64c54b in Program::create_v_main() ../src/program.cpp:32
+    #7 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #8 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #9 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #10 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 128 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fb6e2 in realloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x77af4d67d2f4  (/usr/lib/libgcc_s.so.1+0xc02f4)
+    #2 0x77af4d67d8b5  (/usr/lib/libgcc_s.so.1+0xc08b5)
+    #3 0x77af548ac34a  (/usr/lib/libc.so.6+0x9834a) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #4 0x77af548ac3c8 in __pthread_once (/usr/lib/libc.so.6+0x983c8) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #5 0x77af4de6ca5f  (/usr/lib/libstdc++.so.6.0.33+0xa6ca5f)
+    #6 0x77af4df24825  (/usr/lib/libstdc++.so.6.0.33+0xb24825)
+    #7 0x77af4de6cdb8  (/usr/lib/libstdc++.so.6.0.33+0xa6cdb8)
+    #8 0x77af4d62f892  (/usr/lib/libgcc_s.so.1+0x72892)
+    #9 0x77af4dd0507f  (/usr/lib/libstdc++.so.6.0.33+0x90507f)
+    #10 0x77af4d6318a9  (/usr/lib/libgcc_s.so.1+0x748a9)
+    #11 0x77af4d63a40f  (/usr/lib/libgcc_s.so.1+0x7d40f)
+    #12 0x77af50fd68b0  (<unknown module>)
+    #13 0x77af50fe1f4c  (<unknown module>)
+    #14 0x77af50fd7358  (<unknown module>)
+    #15 0x77af50fc583b  (<unknown module>)
+    #16 0x77af54f8f774 in SDL_EGL_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x18f774) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #17 0x77af55076721 in Wayland_GLES_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x276721) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #18 0x77af54faa2e3 in SDL_GL_LoadLibrary_REAL (/usr/local/lib/libSDL3.so.0+0x1aa2e3) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #19 0x77af54fa5ad2 in SDL_RecreateWindow (/usr/local/lib/libSDL3.so.0+0x1a5ad2) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #20 0x77af54eb7e4c in GL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0xb7e4c) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #21 0x77af54ea4efd in SDL_CreateRendererWithProperties_REAL (/usr/local/lib/libSDL3.so.0+0xa4efd) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #22 0x77af54ea53d1 in SDL_CreateRenderer_REAL (/usr/local/lib/libSDL3.so.0+0xa53d1) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #23 0x77af54e625ff in SDL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0x625ff) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #24 0x5c380d650bc6 in Program::init() ../src/program.cpp:261
+    #25 0x5c380d6185e7 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a5e7) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #26 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #27 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #28 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #29 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 96 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af545455ba in g_malloc (/usr/lib/libglib-2.0.so.0+0x625ba) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af5452618b in g_hash_table_new_full (/usr/lib/libglib-2.0.so.0+0x4318b) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af509e2c73  (<unknown module>)
+    #4 0x77af54556116 in g_option_context_parse (/usr/lib/libglib-2.0.so.0+0x73116) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #5 0x77af509daab2  (<unknown module>)
+    #6 0x77af509e2a32  (<unknown module>)
+    #7 0x77af543bcd43  (<unknown module>)
+
+Direct leak of 40 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af50fd036f  (<unknown module>)
+    #2 0x77af50fc5730  (<unknown module>)
+    #3 0x77af54f8f774 in SDL_EGL_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x18f774) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af55076721 in Wayland_GLES_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x276721) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54faa2e3 in SDL_GL_LoadLibrary_REAL (/usr/local/lib/libSDL3.so.0+0x1aa2e3) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x77af54fa5ad2 in SDL_RecreateWindow (/usr/local/lib/libSDL3.so.0+0x1a5ad2) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #7 0x77af54eb7e4c in GL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0xb7e4c) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #8 0x77af54ea4efd in SDL_CreateRendererWithProperties_REAL (/usr/local/lib/libSDL3.so.0+0xa4efd) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #9 0x77af54ea53d1 in SDL_CreateRenderer_REAL (/usr/local/lib/libSDL3.so.0+0xa53d1) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #10 0x77af54e625ff in SDL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0x625ff) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #11 0x5c380d650bc6 in Program::init() ../src/program.cpp:261
+    #12 0x5c380d6185e7 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a5e7) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #13 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #14 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #15 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #16 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Direct leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af545455ba in g_malloc (/usr/lib/libglib-2.0.so.0+0x625ba) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af5455b6aa in g_strdup (/usr/lib/libglib-2.0.so.0+0x786aa) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af51d39c8d  (/usr/lib/libasan.so.8.0.0+0xa36c8d)
+    #4 0x77af543bcd33  (<unknown module>)
+
+Direct leak of 7 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af545455ba in g_malloc (/usr/lib/libglib-2.0.so.0+0x625ba) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af5455b6aa in g_strdup (/usr/lib/libglib-2.0.so.0+0x786aa) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af51d31c7b  (/usr/lib/libasan.so.8.0.0+0xa2ec7b)
+    #4 0x77af509da03e  (<unknown module>)
+    #5 0x77af545557c8 in g_option_context_parse (/usr/lib/libglib-2.0.so.0+0x727c8) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #6 0x77af509daab2  (<unknown module>)
+    #7 0x77af509e2a32  (<unknown module>)
+    #8 0x77af543bcd43  (<unknown module>)
+
+Direct leak of 1 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af545455ba in g_malloc (/usr/lib/libglib-2.0.so.0+0x625ba) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af5455b6aa in g_strdup (/usr/lib/libglib-2.0.so.0+0x786aa) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af51d31070  (/usr/lib/libasan.so.8.0.0+0xa2e070)
+    #4 0x77af55a162e6  (/lib64/ld-linux-x86-64.so.2+0x52e6) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #5 0x77af55a163dc  (/lib64/ld-linux-x86-64.so.2+0x53dc) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #6 0x77af55a125c1 in _dl_catch_exception (/lib64/ld-linux-x86-64.so.2+0x15c1) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #7 0x77af55a1d13b  (/lib64/ld-linux-x86-64.so.2+0xc13b) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #8 0x77af55a12522 in _dl_catch_exception (/lib64/ld-linux-x86-64.so.2+0x1522) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #9 0x77af55a1d533  (/lib64/ld-linux-x86-64.so.2+0xc533) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #10 0x77af548a29e3  (/usr/lib/libc.so.6+0x8e9e3) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x77af55a12522 in _dl_catch_exception (/lib64/ld-linux-x86-64.so.2+0x1522) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #12 0x77af55a12678  (/lib64/ld-linux-x86-64.so.2+0x1678) (BuildId: c560bca2bb17f5f25c6dafd8fc19cf1883f88558)
+    #13 0x77af548a24c2  (/usr/lib/libc.so.6+0x8e4c2) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #14 0x77af548a2a9e in dlopen (/usr/lib/libc.so.6+0x8ea9e) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #15 0x77af552cbb7f in dlopen /usr/src/debug/gcc/gcc/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:6341
+    #16 0x77af543d8eee in libdecor_new (/usr/lib/../lib/libdecor-0.so.0+0x5eee) (BuildId: 9cba1ef9397dbdc0240502f05dda17b613d8c0a5)
+
+Indirect leak of 8064 byte(s) in 252 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af539bcac0  (/usr/lib/libfontconfig.so.1+0xcac0) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 3130 byte(s) in 244 object(s) allocated from:
+    #0 0x77af552f628a in strdup /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x77af539bc213  (/usr/lib/libfontconfig.so.1+0xc213) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 2400 byte(s) in 75 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af539d547d  (/usr/lib/libfontconfig.so.1+0x2547d) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 1792 byte(s) in 56 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af539d0b0c  (/usr/lib/libfontconfig.so.1+0x20b0c) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 1096 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f0ee25 in SDL_aligned_alloc_REAL (/usr/local/lib/libSDL3.so.0+0x10ee25) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54f9c122 in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c122) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #7 0x5c380d64c54b in Program::create_v_main() ../src/program.cpp:32
+    #8 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #9 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #10 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #12 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 1096 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f0ee25 in SDL_aligned_alloc_REAL (/usr/local/lib/libSDL3.so.0+0x10ee25) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54f9c122 in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c122) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #7 0x5c380d64c207 in Program::create_v_main() ../src/program.cpp:30
+    #8 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #9 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #10 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #12 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 1096 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f0ee25 in SDL_aligned_alloc_REAL (/usr/local/lib/libSDL3.so.0+0x10ee25) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54f9c122 in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c122) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #7 0x5c380d64c6e4 in Program::create_v_main() ../src/program.cpp:33
+    #8 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #9 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #10 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #12 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 1096 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af54f0bbcf in real_malloc (/usr/local/lib/libSDL3.so.0+0x10bbcf) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #2 0x77af54f0be36 in SDL_malloc_REAL (/usr/local/lib/libSDL3.so.0+0x10be36) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #3 0x77af54f0ee25 in SDL_aligned_alloc_REAL (/usr/local/lib/libSDL3.so.0+0x10ee25) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af54f9c122 in SDL_CreateSurface_REAL (/usr/local/lib/libSDL3.so.0+0x19c122) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54e626a6 in SDL_CreateSurface (/usr/local/lib/libSDL3.so.0+0x626a6) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x5c380d61e1aa in Graphic::get_tile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) ../src/graphic.cpp:45
+    #7 0x5c380d64c3a9 in Program::create_v_main() ../src/program.cpp:31
+    #8 0x5c380d6186e8 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a6e8) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #9 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #10 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #11 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #12 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 459 byte(s) in 53 object(s) allocated from:
+    #0 0x77af552f628a in strdup /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x77af539d08a8 in FcValueSave (/usr/lib/libfontconfig.so.1+0x208a8) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 384 byte(s) in 12 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af539d09c0  (/usr/lib/libfontconfig.so.1+0x209c0) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 288 byte(s) in 2 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af50f71867  (<unknown module>)
+    #2 0x77af50f71bf3  (<unknown module>)
+    #3 0x77af50f76851  (<unknown module>)
+    #4 0x77af50fd02fb  (<unknown module>)
+    #5 0x77af50fc5730  (<unknown module>)
+    #6 0x77af54f8f774 in SDL_EGL_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x18f774) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #7 0x77af55076721 in Wayland_GLES_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x276721) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #8 0x77af54faa2e3 in SDL_GL_LoadLibrary_REAL (/usr/local/lib/libSDL3.so.0+0x1aa2e3) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #9 0x77af54fa5ad2 in SDL_RecreateWindow (/usr/local/lib/libSDL3.so.0+0x1a5ad2) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #10 0x77af54eb7e4c in GL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0xb7e4c) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #11 0x77af54ea4efd in SDL_CreateRendererWithProperties_REAL (/usr/local/lib/libSDL3.so.0+0xa4efd) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #12 0x77af54ea53d1 in SDL_CreateRenderer_REAL (/usr/local/lib/libSDL3.so.0+0xa53d1) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #13 0x77af54e625ff in SDL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0x625ff) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #14 0x5c380d650bc6 in Program::init() ../src/program.cpp:261
+    #15 0x5c380d6185e7 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a5e7) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #16 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #17 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #18 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #19 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 128 byte(s) in 4 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af539d0a30  (/usr/lib/libfontconfig.so.1+0x20a30) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 96 byte(s) in 2 object(s) allocated from:
+    #0 0x77af552fca31 in malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x77af539c6988 in FcLangSetCopy (/usr/lib/libfontconfig.so.1+0x16988) (BuildId: 6aec681ec5b2fb80f3a60e3cf3d75abac345c9b3)
+
+Indirect leak of 40 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af50fd036f  (<unknown module>)
+    #2 0x77af50fc5730  (<unknown module>)
+    #3 0x77af54f8f774 in SDL_EGL_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x18f774) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #4 0x77af55076721 in Wayland_GLES_LoadLibrary (/usr/local/lib/libSDL3.so.0+0x276721) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #5 0x77af54faa2e3 in SDL_GL_LoadLibrary_REAL (/usr/local/lib/libSDL3.so.0+0x1aa2e3) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #6 0x77af54fa5ad2 in SDL_RecreateWindow (/usr/local/lib/libSDL3.so.0+0x1a5ad2) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #7 0x77af54eb7e4c in GL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0xb7e4c) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #8 0x77af54ea4efd in SDL_CreateRendererWithProperties_REAL (/usr/local/lib/libSDL3.so.0+0xa4efd) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #9 0x77af54ea53d1 in SDL_CreateRenderer_REAL (/usr/local/lib/libSDL3.so.0+0xa53d1) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #10 0x77af54e625ff in SDL_CreateRenderer (/usr/local/lib/libSDL3.so.0+0x625ff) (BuildId: f774879aa3e79989b25ca540e744c0b55e20968d)
+    #11 0x5c380d650bc6 in Program::init() ../src/program.cpp:261
+    #12 0x5c380d6185e7 in Program::Program(int, int, int, int, int) (/home/lion/Documents/mapgen/_build/mapgen+0x1a5e7) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+    #13 0x5c380d615c4e in main ../src/mapgen.cpp:15
+    #14 0x77af54839c87  (/usr/lib/libc.so.6+0x25c87) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #15 0x77af54839d4b in __libc_start_main (/usr/lib/libc.so.6+0x25d4b) (BuildId: 32a656aa5562eece8c59a585f5eacd6cf5e2307b)
+    #16 0x5c380d615944 in _start (/home/lion/Documents/mapgen/_build/mapgen+0x17944) (BuildId: 546bef7d36fb5e9a239f6d8b7730a3db88cd307b)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fc34a in calloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x77af545462c2 in g_malloc0 (/usr/lib/libglib-2.0.so.0+0x632c2) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af5452612f  (/usr/lib/libglib-2.0.so.0+0x4312f) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af545261c4 in g_hash_table_new_full (/usr/lib/libglib-2.0.so.0+0x431c4) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #4 0x77af509e2c73  (<unknown module>)
+    #5 0x77af54556116 in g_option_context_parse (/usr/lib/libglib-2.0.so.0+0x73116) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #6 0x77af509daab2  (<unknown module>)
+    #7 0x77af509e2a32  (<unknown module>)
+    #8 0x77af543bcd43  (<unknown module>)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x77af552fb6e2 in realloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x77af5454637a in g_realloc (/usr/lib/libglib-2.0.so.0+0x6337a) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #2 0x77af54526119  (/usr/lib/libglib-2.0.so.0+0x43119) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #3 0x77af545261c4 in g_hash_table_new_full (/usr/lib/libglib-2.0.so.0+0x431c4) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #4 0x77af509e2c73  (<unknown module>)
+    #5 0x77af54556116 in g_option_context_parse (/usr/lib/libglib-2.0.so.0+0x73116) (BuildId: 7abffba39dc59aa95290cbeb721e69fe4e3012fb)
+    #6 0x77af509daab2  (<unknown module>)
+    #7 0x77af509e2a32  (<unknown module>)
+    #8 0x77af543bcd43  (<unknown module>)
+
+SUMMARY: AddressSanitizer: 27813 byte(s) leaked in 722 allocation(s).

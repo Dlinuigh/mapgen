@@ -21,7 +21,7 @@ void Widget::draw(SDL_Renderer *render, SDL_Event) {
   SDL_DestroyTexture(texture);
 }
 
-void Widget::resize(float length, bool horizon) {
+void Widget::resize(const float length, const bool horizon) {
   if (horizon) {
     area.w = length;
     area.h = length / ratio;
@@ -31,20 +31,17 @@ void Widget::resize(float length, bool horizon) {
   }
 }
 
-void Widget::locate(glm::fvec2 position) {
+void Widget::locate(const glm::fvec2 position) {
   area.x = position.x;
   area.y = position.y;
 }
 
-void Widget::set_desire_size(glm::fvec2 size) {
+void Widget::set_desire_size(const glm::fvec2 size) {
   area.w = size.x;
   area.h = size.y;
 }
 
 void Check::set_check_texture(SDL_Surface *surface) {
-  if (check_sign != nullptr) {
-    SDL_DestroySurface(check_sign);
-  }
   check_sign = surface;
 }
 
@@ -114,7 +111,7 @@ void Map::clear_tile(SDL_Renderer *render, const SDL_FRect dst) const {
   SDL_RenderFillRect(render, &dst);
 }
 
-void Map::draw_tile(SDL_Renderer *render, glm::ivec2 pos) {
+void Map::draw_tile(SDL_Renderer *render, const glm::ivec2 pos) {
   const SDL_FRect dst = get_area(pos);
   if (function_state[2]) {
     clear_tile(render, dst);
@@ -160,10 +157,10 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       data[start_pos.x][start_pos.y] = function_state[2] ? ' ' : code;
       draw_tile(render, start_pos);
     } else if (function_state[1]) {
-      int min_x = std::min(start_pos.x, end_pos.x);
-      int min_y = std::min(start_pos.y, end_pos.y);
-      int max_x = std::max(start_pos.x, end_pos.x);
-      int max_y = std::max(start_pos.y, end_pos.y);
+      const int min_x = std::min(start_pos.x, end_pos.x);
+      const int min_y = std::min(start_pos.y, end_pos.y);
+      const int max_x = std::max(start_pos.x, end_pos.x);
+      const int max_y = std::max(start_pos.y, end_pos.y);
       for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
           data[i][j] = function_state[2] ? ' ' : code;
@@ -171,11 +168,11 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
         }
       }
     } else if (function_state[3]) {
-      char find_this_same = data[start_pos.x][start_pos.y];
+      const char find_this_same = data[start_pos.x][start_pos.y];
       std::vector<glm::ivec2> adj_set;
-      sign.assign(size.x, std::vector<bool>(size.y, false));
+      sign.assign(size.x, std::vector(size.y, false));
       dfs(start_pos.x, start_pos.y, adj_set, find_this_same);
-      for (auto &it : adj_set) {
+      for (const auto &it : adj_set) {
         draw_tile(render, it);
       }
     }

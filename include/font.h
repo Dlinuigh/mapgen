@@ -24,7 +24,7 @@ public:
   TTF_Font *get_font(const std::string &_font, int fsize) {
     const auto key = std::make_pair(_font, fsize);
     if (!flut.contains(key)) {
-      const std::string ffile = std::string("../assets/font/") + _font;
+      const std::string ffile = std::string("assets/font/") + _font;
       TTF_Font *font = TTF_OpenFont(ffile.c_str(), fsize);
       flut[key] = font;
     }

@@ -80,7 +80,7 @@ void View::locate() {
 }
 
 void View::locate_child(const std::shared_ptr<Widget> &child,
-                        const Position position) {
+                        const Position position)const {
   // 根据大小与相对位置确定绝对位置
   glm::fvec2 pos = {};
   glm::fvec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
@@ -125,7 +125,7 @@ bool View::click() {
                              [](auto it) { return it.first->click(); });
 }
 
-void View::draw(SDL_Renderer *render, const SDL_Event event) {
+void View::draw(SDL_Renderer *render, const SDL_Event &event) {
   for (const auto &child : children | std::ranges::views::keys) {
     child->draw(render, event);
   }

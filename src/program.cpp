@@ -26,12 +26,13 @@ void Program::create_v_main() {
   auto rect = std::make_shared<Check>(graphic.get_tile("tool", "rect"));
   auto eraser = std::make_shared<Check>(graphic.get_tile("tool", "eraser"));
   auto bucket = std::make_shared<Check>(graphic.get_tile("tool", "bucket"));
-  auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"));
+  const auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"));
+  // FIXME 下面的四个surface都发生了leak
   point->set_check_texture(graphic.get_tile("tool", "select"));
   rect->set_check_texture(graphic.get_tile("tool", "select"));
   eraser->set_check_texture(graphic.get_tile("tool", "select"));
   bucket->set_check_texture(graphic.get_tile("tool", "select"));
-  glm::fvec2 enlarge_tile(64, 64);
+   constexpr glm::fvec2 enlarge_tile(64, 64);
   point->set_desire_size(enlarge_tile);
   rect->set_desire_size(enlarge_tile);
   eraser->set_desire_size(enlarge_tile);
@@ -194,8 +195,8 @@ void Program::print() const {
     m.append(line);
   }
   document["main"] = m;
-  Json::StreamWriterBuilder builder;
-  const std::string output = Json::writeString(builder, document);
+  const Json::StreamWriterBuilder builder;
+  const std::string output = writeString(builder, document);
   std::cout << output << std::endl;
 }
 
@@ -251,8 +252,8 @@ void Program::draw() const {
 }
 
 bool Program::is_quit(const SDL_Event &event) {
-  return (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_Q &&
-          event.key.mod & SDL_KMOD_CTRL);
+  return event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_Q &&
+          event.key.mod & SDL_KMOD_CTRL;
 }
 
 void Program::init() {

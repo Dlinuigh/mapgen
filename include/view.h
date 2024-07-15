@@ -25,7 +25,7 @@ public:
 };
 
 class View final {
-  void locate_child(const std::shared_ptr<Widget> &child, Position position);
+  void locate_child(const std::shared_ptr<Widget> &child, Position position)const;
 
   glm::ivec2 scr_size;
 
@@ -38,7 +38,7 @@ public:
 
   void push_back(const std::shared_ptr<Widget> &child, Position position);
 
-  void draw(SDL_Renderer *render, SDL_Event event);
+  void draw(SDL_Renderer *render, const SDL_Event &event);
 
   void locate();
 

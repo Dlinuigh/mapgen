@@ -18,8 +18,7 @@ public:
   // 还有一点：缩放后不会进行拉伸，要不然会导致变形
   Widget()=default;
 
-  virtual ~Widget() { SDL_DestroySurface(bg); }
-
+  virtual ~Widget()=default;
   // 函数用来将内容绘制到texture上，并且不会获取任何texture的信息，只是复制。
   virtual void draw(SDL_Renderer *, SDL_Event);
 
@@ -40,14 +39,14 @@ public:
 
 class Check final : public Widget {
   bool activated = false;
-  SDL_Surface *check_sign;
+  SDL_Surface *check_sign=nullptr;
 
 public:
-  explicit Check(SDL_Surface *surface) : check_sign(nullptr) {
+  explicit Check(SDL_Surface *surface) {
     bg = surface;
     // 获取背景材质的大小并计算需求大小。在创建时必须要设置bg的信息。
     // 图片保持原始长宽比例才行
-    glm::fvec2 size(surface->w, surface->h);
+    const glm::fvec2 size(surface->w, surface->h);
     area.w = size.x;
     area.h = size.y;
     ratio = area.w / area.h;
@@ -57,14 +56,13 @@ public:
 
   void set_check_texture(SDL_Surface *surface);
 
-  void draw(SDL_Renderer *renderer, SDL_Event) override;
+  void draw(SDL_Renderer *render, SDL_Event) override;
 
   bool click() override;
 
-  ~Check() override = default;
 };
 
-class Cell : public Widget {
+class Cell final : public Widget {
   char value = ' ';
 
 public:
@@ -111,7 +109,7 @@ class Map final : public Widget {
 public:
   std::vector<std::vector<char>> data;
 
-  Map(glm::ivec2 _size, float tilesize, SDL_Renderer *render)
+  Map(const glm::ivec2 _size, const float tilesize, SDL_Renderer *render)
       : size(_size), start_pos(), end_pos(), tile_size(tilesize),
         graphic(Graphic::getInstance()) {
     area.w = static_cast<float>(size.x) * tilesize;
