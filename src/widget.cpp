@@ -1,124 +1,65 @@
 #include "widget.h"
-
 bool Widget::in() const {
   glm::fvec2 mouse;
   SDL_GetMouseState(&mouse.x, &mouse.y);
-  return mouse.x > area.x && mouse.x <= area.x + area.w && mouse.y > area.y &&
-         mouse.y <= area.y + area.h;
+  return mouse.x > area.x && mouse.x <= area.x + area.w && mouse.y > area.y && mouse.y <= area.y + area.h;
 }
-
-bool Widget::click() {
-  if (in() && callback != nullptr) {
-    callback();
-    return true;
-  }
-  return false;
-}
-
-void Widget::draw(SDL_Renderer *render, SDL_Event) {
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
-  SDL_RenderTexture(render, texture, nullptr, &area);
-  SDL_DestroyTexture(texture);
-}
-
-void Widget::resize(const float length, const bool horizon) {
-  if (horizon) {
-    area.w = length;
-    area.h = length / ratio;
-  } else {
-    area.h = length;
-    area.w = length * ratio;
-  }
-}
-
+void Widget::draw(SDL_Renderer*,SDL_Event){}
+bool Widget::pressed(SDL_Event &) { return false; }
+bool Widget::released(SDL_Event &) { return false; }
+bool Widget::hovering(SDL_Event &) { return false; }
+// void Widget::resize(const float length, const bool horizon) {
+//   if (horizon) {
+//     area.w = length;
+//     area.h = length / ratio;
+//   } else {
+//     area.h = length;
+//     area.w = length * ratio;
+//   }
+// }
 void Widget::locate(const glm::fvec2 position) {
   area.x = position.x;
   area.y = position.y;
 }
-
-void Widget::set_desire_size(const glm::fvec2 size) {
+void Widget::resize(const glm::fvec2 size) {
   area.w = size.x;
   area.h = size.y;
 }
-
-void Check::set_check_texture(SDL_Surface *surface) { check_sign = surface; }
-
 void Check::draw(SDL_Renderer *render, SDL_Event) {
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
-  SDL_RenderTexture(render, texture, nullptr, &area);
-  SDL_DestroyTexture(texture);
+  SDL_RenderTexture(render, bg, nullptr, &area);
   if (activated) {
-    SDL_Texture *sdl_texture = SDL_CreateTextureFromSurface(render, check_sign);
-    SDL_RenderTexture(render, sdl_texture, nullptr, &area);
-    SDL_DestroyTexture(sdl_texture);
+    SDL_RenderTexture(render, selected, nullptr, &area);
   }
 }
-
-bool Check::click() {
-  if (in() && callback != nullptr) {
-    callback();
+bool Check::pressed(SDL_Event &) {
+  if (in() && press != nullptr) {
+    press();
     return true;
   } else {
     return false;
   }
 }
-
 void Check::activate() { activated = !activated; }
-
-void Cell::set_value(const char c) {
-  // for external function callback to change value to a variable value.
-  value = c;
-}
-
-bool Cell::click() {
-  if (in() && callback != nullptr) {
-    callback();
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void Cell::draw(SDL_Renderer *render, SDL_Event) {
-  if (bg != nullptr) {
-    SDL_DestroySurface(bg);
-  }
-  bg = TTF_RenderUTF8_Solid(font, &value, fcolor);
-  const auto w = static_cast<float>(bg->w);
-  const auto h = static_cast<float>(bg->h);
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
-  const SDL_FRect dst = {area.x + (area.w - w) / 2, area.y + (area.h - h) / 2,
-                         w, h};
-  SDL_RenderTexture(render, texture, nullptr, &dst);
-  SDL_DestroyTexture(texture);
-}
-
 void Map::draw_char(SDL_Renderer *render, const SDL_FRect dst) const {
-  SDL_Surface *surface = graphic.get_char(code, font, fcolor);
-  const auto w = static_cast<float>(surface->w);
-  const auto h = static_cast<float>(surface->h);
-  const SDL_FRect draw_text_area = {dst.x + (dst.w - w) / 2,
-                                    dst.y + (dst.h - h) / 2, w, h};
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, surface);
-  SDL_RenderTexture(render, texture, nullptr, &draw_text_area);
-  SDL_DestroyTexture(texture);
+  SDL_Texture *texture_char = graphic.get_char(keycode, font, fcolor);
+  float w = 0.0f, h = 0.0f;
+  SDL_GetTextureSize(texture_char, &w, &h);
+  const SDL_FRect draw_text_area = {dst.x + (dst.w - w) / 2, dst.y + (dst.h - h) / 2, w, h};
+  SDL_RenderTexture(render, texture_char, nullptr, &draw_text_area);
 }
-
 void Map::clear_tile(SDL_Renderer *render, const SDL_FRect dst) const {
   SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
   SDL_RenderFillRect(render, &dst);
 }
-
 void Map::draw_tile(SDL_Renderer *render, const glm::ivec2 pos) {
   const SDL_FRect dst = get_area(pos);
-  if (function_state[2]) {
+  if (special_action == -1) {
     clear_tile(render, dst);
   } else {
     clear_tile(render, dst);
     draw_char(render, dst);
   }
 }
-
 void Map::generate_grid(SDL_Renderer *render) const {
   SDL_SetRenderTarget(render, grid);
   for (int i = 0; i <= size.x; i++) {
@@ -135,70 +76,95 @@ void Map::generate_grid(SDL_Renderer *render) const {
   }
 }
 void Map::draw_grid(SDL_Renderer *render) const {
-  // 不是用texture会导致性能下降
   SDL_RenderTexture(render, grid, nullptr, &area);
 }
-
-void Map::draw(SDL_Renderer *render, SDL_Event event) {
+void Map::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *target = SDL_GetRenderTarget(render);
-  SDL_SetRenderTarget(render, map_view);
+  SDL_SetRenderTarget(render, bg);
   if (begin_draw) {
-    if (function_state[0]) {
-      // 对于dfs会提前修改data
-      data[start_pos.x][start_pos.y] = function_state[2] ? ' ' : code;
-      draw_tile(render, start_pos);
-    } else if (function_state[1]) {
-      const int min_x = std::min(start_pos.x, end_pos.x);
-      const int min_y = std::min(start_pos.y, end_pos.y);
-      const int max_x = std::max(start_pos.x, end_pos.x);
-      const int max_y = std::max(start_pos.y, end_pos.y);
+    switch (select_type) {
+    case 1: {
+      auto pair = std::pair(pos_start.x,pos_start.y);
+      adj_block[data[pos_start.x][pos_start.y]].erase(pair);
+      adj_block[special_action == -1 ? ' ' : keycode].insert(pair);
+      data[pos_start.x][pos_start.y] = special_action == -1 ? ' ' : keycode;
+      draw_tile(render, pos_start);
+      break;
+    }
+    case 2: {
+      const int min_x = std::min(pos_start.x, pos_end.x);
+      const int min_y = std::min(pos_start.y, pos_end.y);
+      const int max_x = std::max(pos_start.x, pos_end.x);
+      const int max_y = std::max(pos_start.y, pos_end.y);
       for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
-          data[i][j] = function_state[2] ? ' ' : code;
-          draw_tile(render, glm::ivec2(i, j));
+          auto point = std::pair(i, j);
+          adj_block[data[i][j]].erase(point);
+          adj_block[special_action == -1 ? ' ' : keycode].insert(point);
+          data[i][j] = special_action == -1 ? ' ' : keycode;
+          draw_tile(render, glm::ivec2(i,j));
         }
       }
-    } else if (function_state[3]) {
-      const char find_this_same = data[start_pos.x][start_pos.y];
-      std::vector<glm::ivec2> adj_set;
-      sign.assign(size.x, std::vector(size.y, false));
-      dfs(start_pos.x, start_pos.y, adj_set, find_this_same);
-      for (const auto &it : adj_set) {
-        draw_tile(render, it);
+      break;
+    }
+    case 3: {
+      adj_block[special_action == -1 ? ' ' : keycode].insert(
+          adj_block[data[pos_start.x][pos_start.y]].begin(),
+          adj_block[data[pos_start.x][pos_start.y]].end());
+      adj_block.erase(data[pos_start.x][pos_start.y]);
+      for (const auto &it : adj_block[special_action == -1 ? ' ' : keycode]) {
+        data[it.first][it.second] = special_action == -1 ? ' ' : keycode;
+        draw_tile(render, glm::ivec2(it.first,it.second));
       }
-    } else if (function_state[4]) {
-      if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
-          event.button.button == SDL_BUTTON_LEFT) {
-        left_button_down = true;
-      } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
-                 event.button.button == SDL_BUTTON_RIGHT) {
-        left_button_down = false;
-      } else if (event.type == SDL_EVENT_MOUSE_MOTION && left_button_down) {
-        glm::ivec2 pos = get_grid();
-        draw_tile(render, pos);
-      }
+      break;
+    }
+    case 4: {
+      // free paint
+    }
+    // case 4: {
+    //   const int min_x = std::min(pos_start.x, pos_end.x);
+    //   const int min_y = std::min(pos_start.y, pos_end.y);
+    //   const int max_x = std::max(pos_start.x, pos_end.x);
+    //   const int max_y = std::max(pos_start.y, pos_end.y);
+    // }
+    // case 5: {
+    //   const int min_x = std::min(pos_start.x, pos_end.x);
+    //   const int min_y = std::min(pos_start.y, pos_end.y);
+    //   const int max_x = std::max(pos_start.x, pos_end.x);
+    //   const int max_y = std::max(pos_start.y, pos_end.y);
+    // }
+    // case 6: {
+    //   const int min_x = std::min(pos_start.x, pos_end.x);
+    //   const int min_y = std::min(pos_start.y, pos_end.y);
+    //   const int max_x = std::max(pos_start.x, pos_end.x);
+    //   const int max_y = std::max(pos_start.y, pos_end.y);
+    // }
+    // case 7: {
+    //   // saw
+    // }
     }
     begin_draw = false;
   }
   SDL_SetRenderTarget(render, target);
-  SDL_RenderTexture(render, map_view, nullptr, &area);
+  SDL_RenderTexture(render, bg, nullptr, &area);
   draw_grid(render);
 }
-
-bool Map::click() {
+bool Map::pressed(SDL_Event &) {
   if (in()) {
-    if (!function_state[1]) {
-      start_pos = get_grid();
+    if (select_type == 1 || select_type == 3) {
+      pos_start = get_grid();
       begin_draw = true;
+    } else if (select_type == 4 || select_type == 8) {
+
     } else {
       // Rect function
-      if (already_select_one) {
-        end_pos = get_grid();
+      if (already_selected_one) {
+        pos_end = get_grid();
         begin_draw = true;
-        already_select_one = false;
+        already_selected_one = false;
       } else {
-        start_pos = get_grid();
-        already_select_one = true;
+        pos_start = get_grid();
+        already_selected_one = true;
       }
     }
     return true;
@@ -206,78 +172,35 @@ bool Map::click() {
     return false;
   }
 }
-
-void Map::set_key(const char c) { code = c; }
-void Map::set_function(const std::vector<bool> &func) { function_state = func; }
-
+bool Map::hovering(SDL_Event &) {}
+bool Map::released(SDL_Event &) {}
+void Map::set_key(const char c) { keycode = c; }
+void Map::set_function(int _select, int _special){
+  select_type = _select;
+  special_action = _special;
+}
 bool Map::is_valid(const int x, const int y) const {
   return x >= 0 && y >= 0 && x < size.x && y < size.y;
 }
-
-void Map::dfs(const int startX, const int startY,
-              std::vector<glm::ivec2> &adj_set, const char target) {
-  // 定义四个方向的偏移量
-  constexpr int dx[] = {-1, 1, 0, 0};
-  constexpr int dy[] = {0, 0, -1, 1};
-
-  // 创建一个栈用于存储要访问的节点
-  std::stack<std::pair<int, int>> stack;
-  stack.emplace(startX, startY);
-
-  while (!stack.empty()) {
-    auto [x, y] = stack.top();
-    stack.pop();
-
-    // 检查当前点是否有效，是否已访问过，是否与目标字符匹配
-    if (!is_valid(x, y) || sign[x][y] || data[x][y] != target) {
-      continue;
-    }
-
-    // 将当前点加入相邻点集合
-    adj_set.emplace_back(x, y);
-
-    // 标记当前点已访问
-    data[x][y] = function_state[2] ? ' ' : code; // 清空或者赋值
-    sign[x][y] = true;
-
-    // 将四个方向的相邻点压入栈中
-    for (int i = 0; i < 4; ++i) {
-      const int nx = x + dx[i];
-      const int ny = y + dy[i];
-      stack.emplace(nx, ny);
-    }
-  }
-}
-
 glm::ivec2 Map::get_grid() const {
   glm::fvec2 mouse_pos;
   SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
   return {static_cast<int>((mouse_pos.x - area.x) / tile_size),
           static_cast<int>((mouse_pos.y - area.y) / tile_size)};
 }
-
 SDL_FRect Map::get_area(const glm::ivec2 pos) const {
-  return {static_cast<float>(pos.x) * tile_size,
-          static_cast<float>(pos.y) * tile_size, tile_size, tile_size};
+  float f_tile_size = tile_size;
+  return {pos.x * f_tile_size, pos.y * f_tile_size, f_tile_size, f_tile_size};
 }
-
-void Label::set_text(std::string _text) {
+void Label::set_text(std::string _text, SDL_Renderer *render) {
   text = std::move(_text);
-  if (surface != nullptr) {
-    SDL_DestroySurface(surface);
-  }
-  surface = TTF_RenderUTF8_Solid(font, text.c_str(), fcolor);
+  SDL_Surface *surface = TTF_RenderUTF8_Solid(font, text.c_str(), fcolor);
   area.w = static_cast<float>(surface->w);
   area.h = static_cast<float>(surface->h);
+  bg = SDL_CreateTextureFromSurface(render, surface);
 }
-
 void Label::draw(SDL_Renderer *render, SDL_Event) {
   if (bg != nullptr) {
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(render, bg);
-    SDL_RenderTexture(render, texture, nullptr, &area);
-    SDL_DestroyTexture(texture);
+    SDL_RenderTexture(render, bg, nullptr, &area);
   }
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(render, surface);
-  SDL_RenderTexture(render, texture, nullptr, &area);
-  SDL_DestroyTexture(texture);
 }

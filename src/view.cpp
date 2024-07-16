@@ -1,7 +1,6 @@
 #include "view.h"
 
 #include <algorithm>
-#include <ranges>
 
 void Box::push_back(const std::shared_ptr<Widget> &child) {
   children.push_back(child);
@@ -17,9 +16,9 @@ void Box::push_back(const std::shared_ptr<Widget> &child) {
   }
 }
 
-bool Box::click() {
+bool Box::pressed(SDL_Event& event) {
   if (in()) {
-    return std::ranges::any_of(children, [](auto it) { return it->click(); });
+    return std::ranges::any_of(children, [&event](auto it) { return it->pressed(event); });
   }
   return false;
 }
@@ -34,7 +33,7 @@ void Box::draw(SDL_Renderer *render, const SDL_Event event) {
 }
 
 void Box::set_size() {
-  // 设置box的大小，但是似乎不能整理孩子的大小。
+  // TODO 设置box的大小，但是似乎不能整理孩子的大小。
   if (vertical) {
     area.w = child_size.x;
     for (const auto &it : children) {
@@ -74,7 +73,7 @@ void View::push_back(const std::shared_ptr<Widget> &child, Position position, in
 }
 
 void View::locate() {
-  for (auto &[click, draw, fst, snd] : children) {
+  for (auto &[pressed, draw, fst, snd] : children) {
     locate_child(fst, snd);
   }
 }
@@ -120,10 +119,10 @@ void View::locate_child(const std::shared_ptr<Widget> &child,
   child->locate(pos);
 }
 
-bool View::click() {
+bool View::pressed(SDL_Event& event) {
   std::sort(children.begin(), children.end(), Compare(0));
   return std::ranges::any_of(children,
-                             [](auto it) { return std::get<2>(it)->click(); });
+                             [&event](auto it) { return std::get<2>(it)->pressed(event); });
 }
 
 void View::draw(SDL_Renderer *render, const SDL_Event &event) {

@@ -1,6 +1,7 @@
 #include "program.h"
 #include <format>
 #include <iostream>
+#define FPS_LIMIT 120
 
 void Program::create_map() {
   map = std::make_shared<Map>(map_size, tile_size, render);
@@ -9,12 +10,12 @@ void Program::create_map() {
   label_key = std::make_shared<Label>();
   label_key->font = font.get_font("Terminus.ttf", 16);
   label_key->fcolor = {0, 0, 0, 255};
-  label_key->set_text(" ");
-  v_main->push_back(label_key, LU_CORNER,1,1);
+  label_key->set_text(" ", render);
+  v_main->push_back(label_key, LU_CORNER, 1, 1);
   label_position = std::make_shared<Label>();
   label_position->font = font.get_font("Terminus.ttf", 16);
   label_position->fcolor = {0, 0, 0, 255};
-  label_position->set_text("<025,520>");
+  label_position->set_text("<025,520>", render);
   v_main->push_back(label_position, RU_CORNER, 2, 2);
   v_main->push_back(map, CENTER, 3, 0);
 }
@@ -22,81 +23,76 @@ void Program::create_map() {
 void Program::create_v_main() {
   v_main = std::make_shared<View>(scr_size);
   create_map();
-  auto point = std::make_shared<Check>(graphic.get_tile("tool", "point"));
-  auto rect = std::make_shared<Check>(graphic.get_tile("tool", "rect"));
-  auto eraser = std::make_shared<Check>(graphic.get_tile("tool", "eraser"));
-  auto bucket = std::make_shared<Check>(graphic.get_tile("tool", "bucket"));
-  const auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"));
-  auto free_paint = std::make_shared<Check>(graphic.get_tile("tool", "free"));
-  auto circle = std::make_shared<Check>(graphic.get_tile("tool", "circle"));
-  auto box = std::make_shared<Check>(graphic.get_tile("tool", "box"));
-  auto line = std::make_shared<Check>(graphic.get_tile("tool", "line"));
-  auto saw = std::make_shared<Check>(graphic.get_tile("tool", "saw"));
-  auto choose = std::make_shared<Check>(graphic.get_tile("tool", "choose"));
-  auto move = std::make_shared<Check>(graphic.get_tile("tool", "move"));
-  point->set_check_texture(graphic.get_tile("tool", "select"));
-  rect->set_check_texture(graphic.get_tile("tool", "select"));
-  eraser->set_check_texture(graphic.get_tile("tool", "select"));
-  bucket->set_check_texture(graphic.get_tile("tool", "select"));
-  free_paint->set_check_texture(graphic.get_tile("tool", "select"));
-  circle->set_check_texture(graphic.get_tile("tool", "select"));
-  box->set_check_texture(graphic.get_tile("tool", "select"));
-  line->set_check_texture(graphic.get_tile("tool", "select"));
-  saw->set_check_texture(graphic.get_tile("tool", "select"));
-  choose->set_check_texture(graphic.get_tile("tool", "select"));
-  move->set_check_texture(graphic.get_tile("tool", "select"));
+  auto point =
+      std::make_shared<Check>(graphic.get_tile("tool", "point"), graphic.get_tile("tool", "select"));
+  auto rect = std::make_shared<Check>(graphic.get_tile("tool", "rect"), graphic.get_tile("tool", "select"));
+  auto eraser =
+      std::make_shared<Check>(graphic.get_tile("tool", "eraser"), graphic.get_tile("tool", "select"));
+  auto bucket =
+      std::make_shared<Check>(graphic.get_tile("tool", "bucket"), graphic.get_tile("tool", "select"));
+  auto free_paint =
+      std::make_shared<Check>(graphic.get_tile("tool", "free"), graphic.get_tile("tool", "select"));
+  auto circle =
+      std::make_shared<Check>(graphic.get_tile("tool", "circle"), graphic.get_tile("tool", "select"));
+  auto box = std::make_shared<Check>(graphic.get_tile("tool", "box"), graphic.get_tile("tool", "select"));
+  auto line = std::make_shared<Check>(graphic.get_tile("tool", "line"), graphic.get_tile("tool", "select"));
+  auto saw = std::make_shared<Check>(graphic.get_tile("tool", "saw"), graphic.get_tile("tool", "select"));
+  auto choose =
+      std::make_shared<Check>(graphic.get_tile("tool", "choose"), graphic.get_tile("tool", "select"));
+  auto move = std::make_shared<Check>(graphic.get_tile("tool", "move"), graphic.get_tile("tool", "select"));
   constexpr glm::fvec2 enlarge_tile(32, 32);
-  point->set_desire_size(enlarge_tile);
-  rect->set_desire_size(enlarge_tile);
-  eraser->set_desire_size(enlarge_tile);
-  bucket->set_desire_size(enlarge_tile);
-  save->set_desire_size(enlarge_tile);
-  free_paint->set_desire_size(enlarge_tile);
-  circle->set_desire_size(enlarge_tile);
-  box->set_desire_size(enlarge_tile);
-  line->set_desire_size(enlarge_tile);
-  saw->set_desire_size(enlarge_tile);
-  choose->set_desire_size(enlarge_tile);
-  move->set_desire_size(enlarge_tile);
-  point->callback = [this] { trigger(0); };
-  rect->callback = [this] { trigger(1); };
-  eraser->callback = [this] { trigger(2); };
-  bucket->callback = [this] { trigger(3); };
-  save->callback = [this] { print(); };
-  free_paint->callback = [this] { trigger(4); };
-  circle->callback = [this] { trigger(5); };
-  box->callback = [this] { trigger(6); };
-  line->callback = [this] { trigger(7); };
-  saw->callback = [this] { trigger(8); };
-  choose->callback = [this] { trigger(9); };
-  move->callback = [this] { trigger(10); };
-  set_select_flag.emplace_back([point] { point->activate(); });
-  set_select_flag.emplace_back([rect] { rect->activate(); });
-  set_select_flag.emplace_back([eraser] { eraser->activate(); });
-  set_select_flag.emplace_back([bucket] { bucket->activate(); });
-  set_select_flag.emplace_back([free_paint] { free_paint->activate(); });
-  set_select_flag.emplace_back([circle] { circle->activate(); });
-  set_select_flag.emplace_back([box] { box->activate(); });
-  set_select_flag.emplace_back([line] { line->activate(); });
-  set_select_flag.emplace_back([saw] { saw->activate(); });
-  set_select_flag.emplace_back([choose] { choose->activate(); });
-  set_select_flag.emplace_back([move] { move->activate(); });
+  point->resize(enlarge_tile);
+  rect->resize(enlarge_tile);
+  eraser->resize(enlarge_tile);
+  bucket->resize(enlarge_tile);
+  free_paint->resize(enlarge_tile);
+  circle->resize(enlarge_tile);
+  box->resize(enlarge_tile);
+  line->resize(enlarge_tile);
+  saw->resize(enlarge_tile);
+  choose->resize(enlarge_tile);
+  move->resize(enlarge_tile);
+  point->press = [this] { trigger(1); };
+  rect->press = [this] { trigger(2); };
+  eraser->press = [this] { trigger(-1); };
+  bucket->press = [this] { trigger(3); };
+  free_paint->press = [this] { trigger(4); };
+  circle->press = [this] { trigger(5); };
+  box->press = [this] { trigger(6); };
+  line->press = [this] { trigger(7); };
+  saw->press = [this] { trigger(8); };
+  choose->press = [this] { trigger(-2); };
+  move->press = [this] { trigger(-3); };
+  set_select_flag.emplace_back([point] { point->activate(); });           // 1
+  set_select_flag.emplace_back([rect] { rect->activate(); });             // 2
+  set_select_flag.emplace_back([bucket] { bucket->activate(); });         // 3
+  set_select_flag.emplace_back([free_paint] { free_paint->activate(); }); // 4
+  set_select_flag.emplace_back([circle] { circle->activate(); });         // 5
+  set_select_flag.emplace_back([box] { box->activate(); });               // 6
+  set_select_flag.emplace_back([line] { line->activate(); });             // 7
+  set_select_flag.emplace_back([saw] { saw->activate(); });               // 8
+  set_select_flag.emplace_back([move] { move->activate(); });             //-3
+  set_select_flag.emplace_back([choose] { choose->activate(); });         //-2
+  set_select_flag.emplace_back([eraser] { eraser->activate(); });         //-1
   const auto panel = std::make_shared<Box>(false);
-  panel->push_back(point);
-  panel->push_back(rect);
-  panel->push_back(eraser);
-  panel->push_back(bucket);
-  panel->push_back(save);
-  panel->push_back(free_paint);
-  panel->push_back(circle);
-  panel->push_back(box);
-  panel->push_back(line);
-  panel->push_back(saw);
-  panel->push_back(choose);
+  panel->push_back(point);      // click once
+  panel->push_back(rect);       // twice
+  panel->push_back(bucket);     // once
+  panel->push_back(free_paint); // always
+  panel->push_back(circle);     // twice
+  panel->push_back(box);        // twice
+  panel->push_back(line);       // twice
+  panel->push_back(saw);        // always
   panel->push_back(move);
+  panel->push_back(choose);
+  panel->push_back(eraser);
   // 整理大小
   panel->set_size();
-  v_main->push_back(panel, U_SIDE, 0,3);
+  const auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"), nullptr);
+  save->resize(enlarge_tile * 2.0f);
+  save->press = [this] { print(); };
+  v_main->push_back(save, D_SIDE, -1, 4);
+  v_main->push_back(panel, U_SIDE, 0, 3);
   // 整理位置
   v_main->locate();
 }
@@ -105,91 +101,90 @@ void Program::handle() {
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
     if (event.key.mod & SDL_KMOD_SHIFT) {
-      if (event.key.key >= static_cast<int>('a') &&
-          event.key.key <= static_cast<int>('z')) {
-        code = static_cast<char>(event.key.key - 'a' + 'A');
+      if (event.key.key >= static_cast<int>('a') && event.key.key <= static_cast<int>('z')) {
+        keycode = static_cast<char>(event.key.key - 'a' + 'A');
       } else {
         switch (event.key.key) {
         case '`':
-          code = '~';
+          keycode = '~';
           break;
         case '1':
-          code = '!';
+          keycode = '!';
           break;
         case '2':
-          code = '@';
+          keycode = '@';
           break;
         case '3':
-          code = '#';
+          keycode = '#';
           break;
         case '4':
-          code = '$';
+          keycode = '$';
           break;
         case '5':
-          code = '%';
+          keycode = '%';
           break;
         case '6':
-          code = '^';
+          keycode = '^';
           break;
         case '7':
-          code = '&';
+          keycode = '&';
           break;
         case '8':
-          code = '*';
+          keycode = '*';
           break;
         case '9':
-          code = '(';
+          keycode = '(';
           break;
         case '0':
-          code = ')';
+          keycode = ')';
           break;
         case '-':
-          code = '_';
+          keycode = '_';
           break;
         case '=':
-          code = '+';
+          keycode = '+';
           break;
         case '[':
-          code = '{';
+          keycode = '{';
           break;
         case ']':
-          code = '}';
+          keycode = '}';
           break;
         case '\\':
-          code = '|';
+          keycode = '|';
           break;
         case ';':
-          code = ':';
+          keycode = ':';
           break;
         case '\'':
-          code = '\"';
+          keycode = '\"';
           break;
         case ',':
-          code = '<';
+          keycode = '<';
           break;
         case '.':
-          code = '>';
+          keycode = '>';
           break;
         case '/':
-          code = '?';
+          keycode = '?';
           break;
         default:;
         }
       }
     } else if (event.key.mod & SDL_KMOD_CAPS) {
-      code = static_cast<char>(event.key.key - 'a' + 'A');
+      keycode = static_cast<char>(event.key.key - 'a' + 'A');
     } else {
-      code = static_cast<char>(event.key.key);
+      keycode = static_cast<char>(event.key.key);
     }
-    map->set_key(code);
+    map->set_key(keycode);
     char tmp[2];
-    tmp[0] = code;
+    tmp[0] = keycode;
     tmp[1] = '\0';
-    label_key->set_text(tmp);
-  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
-             event.button.button == SDL_BUTTON_LEFT) {
-    v_main->click();
+    label_key->set_text(tmp, render);
+  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+    v_main->pressed(event);
   } else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+    // windows resize
     scr_size.x = event.window.data1;
     scr_size.y = event.window.data2;
     set_view();
@@ -197,31 +192,17 @@ void Program::handle() {
     v_main->locate();
   } else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
     request_quit = true;
-  } else if (event.type == SDL_EVENT_MOUSE_MOTION && map->in() &&
-             !right_button_down) {
+  }
+  if (map->in()) {
     glm::ivec2 mouse_position = map->get_grid();
     const std::string str_position =
         std::format("<{},{}>", mouse_position.x, mouse_position.y);
-    label_position->set_text(str_position);
-  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
-             event.button.button == SDL_BUTTON_RIGHT) {
-    right_button_down = true;
-    SDL_GetMouseState(&button_position.x, &button_position.y);
-    map_old_position.x = map->area.x;
-    map_old_position.y = map->area.y;
-  } else if (event.type == SDL_EVENT_MOUSE_MOTION && right_button_down) {
-    glm::fvec2 tmp_position;
-    SDL_GetMouseState(&tmp_position.x, &tmp_position.y);
-    map->area.x = map_old_position.x + (tmp_position.x - button_position.x);
-    map->area.y = map_old_position.y + (tmp_position.y - button_position.y);
-  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP &&
-             event.button.button == SDL_BUTTON_RIGHT) {
-    right_button_down = false;
+    label_position->set_text(str_position, render);
   }
+  map->set_function(select_type, special_action);
 }
 
 void Program::print() const {
-  // print the result and you can output to a file.
   Json::Value document;
   Json::Value m(Json::arrayValue);
   for (int j = 0; j < map_size.x; j++) {
@@ -238,71 +219,51 @@ void Program::print() const {
 }
 
 void Program::trigger(const int idx) {
-  std::vector<bool> old = function;
-  switch (idx) {
-  case 0: {
-    if (!function[0]) {
-      function[1] = false;
-      function[3] = false;
+  // TODO 蓝图功能引入非常关键，之前的很多就会缺少直观的选取
+  // TODO 自由绘制
+  // TODO 画饼
+  // TODO 画框
+  // TODO 画线
+  // TODO
+  // 画锯齿，也就是类似海岸线的状态，你可以让他在绘制的一定范围内波动，但是要求连接。有点像正弦函数，举个例子，你绘制了从一个点到另一个点会绘制经过这两个点的正弦曲线。
+  // TODO
+  // 选择状态，相当于擦除的对立功能，选择后会停留在选取，使用移动可以移动选取,这个时候会取消选取功能进入移动功能，而与擦除也是对立的，不能同时生效。而直接移动可以与其他的配合，但是只能移动一次选中的内容。首先点击选中，然后左键长按会进入移动状态，放下停止该次移动。而可以重复移动。更换功能会清除选取内容。
+  // TODO 移动选中的值
+  // TODO 随机化填充功能，需要设定一个填充比例
+  // TODO 上下层功能
+  int old_select_type = select_type;
+  int old_special_action = special_action;
+  if (idx > 0) {
+    select_type = idx;
+    special_action = 0;
+  } else if (idx < 0) {
+    special_action = idx;
+    select_type = 0;
+  } else {
+    select_type = 0;
+    special_action = 0;
+  }
+  if (select_type == old_select_type) {
+    if (select_type != 0)
+      set_select_flag[select_type - 1]();
+    else
+      select_type=0;
+  } else {
+    if (old_select_type > 0) {
+      set_select_flag[old_select_type - 1]();
     }
-    function[0].flip();
-    break;
+    set_select_flag[select_type - 1]();
   }
-  case 1: {
-    if (!function[1]) {
-      function[0] = false;
-      function[3] = false;
+  if (special_action == old_special_action) {
+    if (special_action != 0)
+      set_select_flag[set_select_flag.size() + special_action]();
+    else
+      special_action=0;
+  } else {
+    if (old_special_action > 0) {
+      set_select_flag[set_select_flag.size() + old_special_action]();
     }
-    function[1].flip();
-    break;
-  }
-  case 2: {
-    function[2].flip();
-    break;
-  }
-  case 3: {
-    if (!function[3]) {
-      function[1] = false;
-      function[0] = false;
-    }
-    function[3].flip();
-    break;
-  }
-  case 4: {
-    function[4].flip();
-    break;
-  }
-  case 5: {
-    function[5].flip();
-    break;
-  }
-  case 6: {
-    function[6].flip();
-    break;
-  }
-  case 7: {
-    function[7].flip();
-    break;
-  }
-  case 8: {
-    function[8].flip();
-    break;
-  }
-  case 9: {
-    function[9].flip();
-    break;
-  }
-  case 10: {
-    function[10].flip();
-    break;
-  }
-  default:;
-  }
-  map->set_function(function);
-  for (int i = 0; i < 11; i++) {
-    if ((old[i] == false && function[i] == true) ||
-        (old[i] == true && function[i] == false))
-      set_select_flag[i]();
+    set_select_flag[set_select_flag.size() + special_action]();
   }
 }
 
@@ -322,22 +283,33 @@ bool Program::is_quit(const SDL_Event &event) {
 }
 
 void Program::init() {
-  window =
-      SDL_CreateWindow("Program", scr_size.x, scr_size.y, SDL_WINDOW_RESIZABLE);
+  window = SDL_CreateWindow("Program", scr_size.x, scr_size.y, SDL_WINDOW_RESIZABLE);
   render = SDL_CreateRenderer(window, nullptr);
+  graphic.set_render(render);
 }
 
 void Program::set_view() {
   if (view != nullptr) {
     SDL_DestroyTexture(view);
   }
-  view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
-                           SDL_TEXTUREACCESS_TARGET, scr_size.x, scr_size.y);
+  view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET,
+                           scr_size.x, scr_size.y);
 }
 
 void Program::run() {
+  const int DELAY_TIME = 1000 / FPS_LIMIT;
+  // Delay time in milliseconds for each frame
+
+  Uint32 frameStart;
+  int frameTime;
   do {
+    frameStart = SDL_GetTicks();
     handle();
     draw();
+    frameTime = SDL_GetTicks() - frameStart;
+
+    if (frameTime < DELAY_TIME) {
+      SDL_Delay(DELAY_TIME - frameTime);
+    }
   } while (!is_quit(event) && !request_quit);
 }

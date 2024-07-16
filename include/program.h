@@ -19,20 +19,23 @@ class Program {
   float tile_size;
   Graphic &graphic;
   Font &font;
-  char code = ' ';
+
+  char keycode = ' ';
   bool request_quit = false;
-  std::function<void(char)> set_key;
-  std::function<void(std::vector<bool>)> set_function;
+
   std::vector<std::function<void()>> set_select_flag;
+  // 这个函数可以在没有点击该控件的情况修改他的激活状态
+  // 其实就是变相记住了几个控件的地址然后可以调用内部函数
+  // 下面也是，如果在view里面可以迅速获取这个地址，当然也可以，我觉得应该可以考虑这个比如在tuple里面增加name.
   std::shared_ptr<Map> map;
   std::shared_ptr<Label> label_key;
   std::shared_ptr<Label> label_position;
-  glm::fvec2 button_position{};
-  bool right_button_down = false;
-  bool left_button_down = false;
+
   glm::fvec2 map_old_position{};
   glm::ivec2 map_size{};
-  std::vector<bool> function = std::vector(11, false);
+
+  int select_type=0;//0代表点绘制后面依次递增
+  int special_action=0;//0代表正常绘制，-1代表擦除，-2代表选择，-3代表移动
 
   void create_map();
 

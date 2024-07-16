@@ -170,7 +170,7 @@ PenaltyBreakOpenParenthesis: 0
 PenaltyBreakScopeResolution: 500
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
-PenaltyExcessCharacter: 1000000
+PenaltyExcessCharacter: 0 # 由于中文注释会疯狂增加长度，所以直接调成0,改成自己进行调整
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Right

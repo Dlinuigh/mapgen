@@ -7,9 +7,10 @@
 #include <map>
 #include <string>
 class Graphic {
+  SDL_Renderer *render;
   std::map<std::string, SDL_Surface *> textures;
-  std::map<char, SDL_Surface *> charmap;
-  std::map<std::string, SDL_Surface *> tilemap;
+  std::map<char, SDL_Texture *> charmap;
+  std::map<std::string, SDL_Texture *> tilemap;
   Json::Value image_doc = {};
   std::map<std::string, glm::ivec2> tileset = {};
   std::string cached_png_name = {};
@@ -24,22 +25,23 @@ class Graphic {
 public:
   Graphic(Graphic const &) = delete;
   void operator=(Graphic const &) = delete;
-  SDL_Surface *get_tile(const std::string &name, const std::string &tilename);
-  SDL_Surface *get_char(char key, TTF_Font *font, SDL_Color fcolor);
+  SDL_Texture *get_tile(const std::string &name, const std::string &tilename);
+  SDL_Texture *get_char(char key, TTF_Font *font, SDL_Color fcolor);
+  void set_render(SDL_Renderer *_render) { render = _render; }
   static Graphic &getInstance() {
     static Graphic instance;
     return instance;
   }
   ~Graphic() {
     for (auto &it : charmap) {
-      SDL_DestroySurface(it.second);
+      SDL_DestroyTexture(it.second);
     }
     for (auto &it : textures) {
       SDL_DestroySurface(it.second);
     }
     for (auto &it : tilemap) {
 
-      SDL_DestroySurface(it.second);
+      SDL_DestroyTexture(it.second);
     }
   }
 };

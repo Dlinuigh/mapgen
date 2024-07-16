@@ -16,7 +16,7 @@ public:
 
   void push_back(const std::shared_ptr<Widget> &child);
 
-  bool click() override;
+  bool pressed(SDL_Event&) override;
 
   void draw(SDL_Renderer *render, SDL_Event event) override;
 
@@ -49,7 +49,7 @@ public:
   std::vector<std::tuple<int, int, std::shared_ptr<Widget>, Position>> children;
   // 支持多个优先级的
 
-  bool click();
+  bool pressed(SDL_Event&);
 
   void push_back(const std::shared_ptr<Widget> &, Position, int, int);
 
