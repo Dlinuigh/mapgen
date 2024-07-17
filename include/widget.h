@@ -63,7 +63,7 @@ class Map final : public Widget {
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
   // std::vector<std::vector<bool>> walked;
-  std::map<char, std::set<std::pair<int,int>>> adj_block; // for fill function
+  std::map<char, std::set<std::pair<int, int>>> adj_block; // for fill function
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
@@ -82,7 +82,7 @@ public:
     data.assign(size.y, std::vector(size.x, ' '));
     for (int i = 0; i < size.x; i++) {
       for (int j = 0; j < size.y; j++) {
-        adj_block[' '].insert(std::pair(i,j));
+        adj_block[' '].insert(std::pair(i, j));
       }
     }
     bg = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, w, h);

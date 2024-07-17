@@ -10,8 +10,7 @@ public:
 
   void operator=(Data const &) = delete;
 
-  static void parse(const std::string &dir, const std::string &file,
-                    Json::Value &doc);
+  static void parse(const std::string &dir, const std::string &file, Json::Value &doc);
 
   static Data &getInstance() {
     static Data instance;

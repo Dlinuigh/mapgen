@@ -1,7 +1,5 @@
 #include "view.h"
-
 #include <algorithm>
-
 void Box::push_back(const std::shared_ptr<Widget> &child) {
   children.push_back(child);
   // 获取组件的最小大小要求
@@ -15,14 +13,13 @@ void Box::push_back(const std::shared_ptr<Widget> &child) {
       child_size.y = child->area.h;
   }
 }
-
-bool Box::pressed(SDL_Event& event) {
+bool Box::pressed(SDL_Event &event) {
   if (in()) {
-    return std::ranges::any_of(children, [&event](auto it) { return it->pressed(event); });
+    return std::ranges::any_of(children,
+                               [&event](auto it) { return it->pressed(event); });
   }
   return false;
 }
-
 void Box::draw(SDL_Renderer *render, const SDL_Event event) {
   if (bg != nullptr) {
     Widget::draw(render, event);
@@ -31,7 +28,6 @@ void Box::draw(SDL_Renderer *render, const SDL_Event event) {
     it->draw(render, event);
   }
 }
-
 void Box::set_size() {
   // TODO 设置box的大小，但是似乎不能整理孩子的大小。
   if (vertical) {
@@ -52,7 +48,6 @@ void Box::set_size() {
     // }
   }
 }
-
 void Box::locate(glm::fvec2 position) {
   area.x = position.x;
   area.y = position.y;
@@ -67,26 +62,21 @@ void Box::locate(glm::fvec2 position) {
     }
   }
 }
-
 void View::push_back(const std::shared_ptr<Widget> &child, Position position, int click_pior, int draw_pior) {
   children.emplace_back(click_pior, draw_pior, child, position);
 }
-
 void View::locate() {
   for (auto &[pressed, draw, fst, snd] : children) {
     locate_child(fst, snd);
   }
 }
-
-void View::locate_child(const std::shared_ptr<Widget> &child,
-                        const Position position) const {
+void View::locate_child(const std::shared_ptr<Widget> &child, const Position position) const {
   // 根据大小与相对位置确定绝对位置
   glm::fvec2 pos = {};
   glm::fvec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
                               static_cast<float>(scr_size.y) - child->area.h};
-  glm::fvec2 c_lu_cor_pos = {
-      static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
-      static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
+  glm::fvec2 c_lu_cor_pos = {static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
+                             static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
   switch (position) {
   case LU_CORNER:
     pos = {0, 0};
@@ -118,13 +108,21 @@ void View::locate_child(const std::shared_ptr<Widget> &child,
   }
   child->locate(pos);
 }
-
-bool View::pressed(SDL_Event& event) {
+bool View::pressed(SDL_Event &event) {
   std::sort(children.begin(), children.end(), Compare(0));
-  return std::ranges::any_of(children,
-                             [&event](auto it) { return std::get<2>(it)->pressed(event); });
+  return std::ranges::any_of(
+      children, [&event](auto it) { return std::get<2>(it)->pressed(event); });
 }
-
+bool View::released(SDL_Event &event) {
+  std::sort(children.begin(), children.end(), Compare(0));
+  return std::ranges::any_of(
+      children, [&event](auto it) { return std::get<2>(it)->released(event); });
+}
+bool View::hovering(SDL_Event &event) {
+  std::sort(children.begin(), children.end(), Compare(0));
+  return std::ranges::any_of(
+      children, [&event](auto it) { return std::get<2>(it)->hovering(event); });
+}
 void View::draw(SDL_Renderer *render, const SDL_Event &event) {
   std::sort(children.begin(), children.end(), Compare(1));
   for (const auto &child : children) {

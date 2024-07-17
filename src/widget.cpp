@@ -4,7 +4,7 @@ bool Widget::in() const {
   SDL_GetMouseState(&mouse.x, &mouse.y);
   return mouse.x > area.x && mouse.x <= area.x + area.w && mouse.y > area.y && mouse.y <= area.y + area.h;
 }
-void Widget::draw(SDL_Renderer*,SDL_Event){}
+void Widget::draw(SDL_Renderer *, SDL_Event) {}
 bool Widget::pressed(SDL_Event &) { return false; }
 bool Widget::released(SDL_Event &) { return false; }
 bool Widget::hovering(SDL_Event &) { return false; }
@@ -84,11 +84,12 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
   if (begin_draw) {
     switch (select_type) {
     case 1: {
-      auto pair = std::pair(pos_start.x,pos_start.y);
+      auto pair = std::pair(pos_start.x, pos_start.y);
       adj_block[data[pos_start.x][pos_start.y]].erase(pair);
       adj_block[special_action == -1 ? ' ' : keycode].insert(pair);
       data[pos_start.x][pos_start.y] = special_action == -1 ? ' ' : keycode;
       draw_tile(render, pos_start);
+      begin_draw = false;
       break;
     }
     case 2: {
@@ -102,9 +103,10 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
           adj_block[data[i][j]].erase(point);
           adj_block[special_action == -1 ? ' ' : keycode].insert(point);
           data[i][j] = special_action == -1 ? ' ' : keycode;
-          draw_tile(render, glm::ivec2(i,j));
+          draw_tile(render, glm::ivec2(i, j));
         }
       }
+      begin_draw = false;
       break;
     }
     case 3: {
@@ -114,36 +116,43 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       adj_block.erase(data[pos_start.x][pos_start.y]);
       for (const auto &it : adj_block[special_action == -1 ? ' ' : keycode]) {
         data[it.first][it.second] = special_action == -1 ? ' ' : keycode;
-        draw_tile(render, glm::ivec2(it.first,it.second));
+        draw_tile(render, glm::ivec2(it.first, it.second));
       }
+      begin_draw = false;
       break;
     }
     case 4: {
       // free paint
+      glm::ivec2 point = get_grid();
+      std::pair pair = std::pair(point.x, point.y);
+      adj_block[data[point.x][point.y]].erase(pair);
+      adj_block[special_action == -1 ? ' ' : keycode].insert(pair);
+      data[point.x][point.y] = special_action == -1 ? ' ' : keycode;
+      draw_tile(render, point);
+      break;
     }
-    // case 4: {
-    //   const int min_x = std::min(pos_start.x, pos_end.x);
-    //   const int min_y = std::min(pos_start.y, pos_end.y);
-    //   const int max_x = std::max(pos_start.x, pos_end.x);
-    //   const int max_y = std::max(pos_start.y, pos_end.y);
-    // }
-    // case 5: {
-    //   const int min_x = std::min(pos_start.x, pos_end.x);
-    //   const int min_y = std::min(pos_start.y, pos_end.y);
-    //   const int max_x = std::max(pos_start.x, pos_end.x);
-    //   const int max_y = std::max(pos_start.y, pos_end.y);
-    // }
-    // case 6: {
-    //   const int min_x = std::min(pos_start.x, pos_end.x);
-    //   const int min_y = std::min(pos_start.y, pos_end.y);
-    //   const int max_x = std::max(pos_start.x, pos_end.x);
-    //   const int max_y = std::max(pos_start.y, pos_end.y);
-    // }
-    // case 7: {
-    //   // saw
-    // }
+      // case 4: {
+      //   const int min_x = std::min(pos_start.x, pos_end.x);
+      //   const int min_y = std::min(pos_start.y, pos_end.y);
+      //   const int max_x = std::max(pos_start.x, pos_end.x);
+      //   const int max_y = std::max(pos_start.y, pos_end.y);
+      // }
+      // case 5: {
+      //   const int min_x = std::min(pos_start.x, pos_end.x);
+      //   const int min_y = std::min(pos_start.y, pos_end.y);
+      //   const int max_x = std::max(pos_start.x, pos_end.x);
+      //   const int max_y = std::max(pos_start.y, pos_end.y);
+      // }
+      // case 6: {
+      //   const int min_x = std::min(pos_start.x, pos_end.x);
+      //   const int min_y = std::min(pos_start.y, pos_end.y);
+      //   const int max_x = std::max(pos_start.x, pos_end.x);
+      //   const int max_y = std::max(pos_start.y, pos_end.y);
+      // }
+      // case 7: {
+      //   // saw
+      // }
     }
-    begin_draw = false;
   }
   SDL_SetRenderTarget(render, target);
   SDL_RenderTexture(render, bg, nullptr, &area);
@@ -155,7 +164,7 @@ bool Map::pressed(SDL_Event &) {
       pos_start = get_grid();
       begin_draw = true;
     } else if (select_type == 4 || select_type == 8) {
-
+      begin_draw = true;
     } else {
       // Rect function
       if (already_selected_one) {
@@ -172,10 +181,24 @@ bool Map::pressed(SDL_Event &) {
     return false;
   }
 }
-bool Map::hovering(SDL_Event &) {}
-bool Map::released(SDL_Event &) {}
+bool Map::hovering(SDL_Event &) {
+  if (in())
+    return true;
+  else
+    return false;
+}
+bool Map::released(SDL_Event &) {
+  if (in()) {
+    if (select_type == 4) {
+      begin_draw = false;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
 void Map::set_key(const char c) { keycode = c; }
-void Map::set_function(int _select, int _special){
+void Map::set_function(int _select, int _special) {
   select_type = _select;
   special_action = _special;
 }
@@ -185,8 +208,10 @@ bool Map::is_valid(const int x, const int y) const {
 glm::ivec2 Map::get_grid() const {
   glm::fvec2 mouse_pos;
   SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-  return {static_cast<int>((mouse_pos.x - area.x) / tile_size),
-          static_cast<int>((mouse_pos.y - area.y) / tile_size)};
+  int x = (mouse_pos.x - area.x) / tile_size;
+  int y = (mouse_pos.y - area.y) / tile_size;
+
+  return {std::max(0, std::min(x, size.x - 1)), std::max(0, std::min(y, size.y - 1))};
 }
 SDL_FRect Map::get_area(const glm::ivec2 pos) const {
   float f_tile_size = tile_size;

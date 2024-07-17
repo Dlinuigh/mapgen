@@ -1,7 +1,7 @@
 #include "program.h"
 #include <format>
 #include <iostream>
-#define FPS_LIMIT 120
+#define FPS_LIMIT 200
 
 void Program::create_map() {
   map = std::make_shared<Map>(map_size, tile_size, render);
@@ -23,23 +23,29 @@ void Program::create_map() {
 void Program::create_v_main() {
   v_main = std::make_shared<View>(scr_size);
   create_map();
-  auto point =
-      std::make_shared<Check>(graphic.get_tile("tool", "point"), graphic.get_tile("tool", "select"));
-  auto rect = std::make_shared<Check>(graphic.get_tile("tool", "rect"), graphic.get_tile("tool", "select"));
-  auto eraser =
-      std::make_shared<Check>(graphic.get_tile("tool", "eraser"), graphic.get_tile("tool", "select"));
-  auto bucket =
-      std::make_shared<Check>(graphic.get_tile("tool", "bucket"), graphic.get_tile("tool", "select"));
-  auto free_paint =
-      std::make_shared<Check>(graphic.get_tile("tool", "free"), graphic.get_tile("tool", "select"));
-  auto circle =
-      std::make_shared<Check>(graphic.get_tile("tool", "circle"), graphic.get_tile("tool", "select"));
-  auto box = std::make_shared<Check>(graphic.get_tile("tool", "box"), graphic.get_tile("tool", "select"));
-  auto line = std::make_shared<Check>(graphic.get_tile("tool", "line"), graphic.get_tile("tool", "select"));
-  auto saw = std::make_shared<Check>(graphic.get_tile("tool", "saw"), graphic.get_tile("tool", "select"));
-  auto choose =
-      std::make_shared<Check>(graphic.get_tile("tool", "choose"), graphic.get_tile("tool", "select"));
-  auto move = std::make_shared<Check>(graphic.get_tile("tool", "move"), graphic.get_tile("tool", "select"));
+  SDL_Texture *texture = graphic.get_tile("tool", "select");
+  SDL_Texture *texture_point = graphic.get_tile("tool", "point");
+  SDL_Texture *texture_rect = graphic.get_tile("tool", "rect");
+  SDL_Texture *texture_eraser = graphic.get_tile("tool", "eraser");
+  SDL_Texture *texture_bucket = graphic.get_tile("tool", "bucket");
+  SDL_Texture *texture_free = graphic.get_tile("tool", "free");
+  SDL_Texture *texture_circle = graphic.get_tile("tool", "circle");
+  SDL_Texture *texture_box = graphic.get_tile("tool", "box");
+  SDL_Texture *texture_line = graphic.get_tile("tool", "line");
+  SDL_Texture *texture_saw = graphic.get_tile("tool", "saw");
+  SDL_Texture *texture_choose = graphic.get_tile("tool", "choose");
+  SDL_Texture *texture_move = graphic.get_tile("tool", "move");
+  auto point = std::make_shared<Check>(texture_point, texture);
+  auto rect = std::make_shared<Check>(texture_rect, texture);
+  auto eraser = std::make_shared<Check>(texture_eraser, texture);
+  auto bucket = std::make_shared<Check>(texture_bucket, texture);
+  auto free_paint = std::make_shared<Check>(texture_free, texture);
+  auto circle = std::make_shared<Check>(texture_circle, texture);
+  auto box = std::make_shared<Check>(texture_box, texture);
+  auto line = std::make_shared<Check>(texture_line, texture);
+  auto saw = std::make_shared<Check>(texture_saw, texture);
+  auto choose = std::make_shared<Check>(texture_choose, texture);
+  auto move = std::make_shared<Check>(texture_move, texture);
   constexpr glm::fvec2 enlarge_tile(32, 32);
   point->resize(enlarge_tile);
   rect->resize(enlarge_tile);
@@ -192,6 +198,10 @@ void Program::handle() {
     v_main->locate();
   } else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
     request_quit = true;
+  } else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+    v_main->released(event);
+  } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+    v_main->hovering(event);
   }
   if (map->in()) {
     glm::ivec2 mouse_position = map->get_grid();
@@ -219,8 +229,9 @@ void Program::print() const {
 }
 
 void Program::trigger(const int idx) {
+  // TODO 填充功能与set不是很配合，因为set只是将相同的放到了一起，没有判断是否相连，判断相连工作量巨大，需要判断这个点和内部的所有点是否有相连的，如果有就加入，否则就另外建一个set,这个样子导致我们的原始数据结构也不行。emmm,不过考虑到判断相连不会很麻烦，所以我觉得最难的在与优化，举个例子，如果我能得到一个多边形，然后判断点与多边形的关系。
+  //上面的问题解决了，通过在data里面判断周围是否存在某个集合就行，如果存在就加入这个集合
   // TODO 蓝图功能引入非常关键，之前的很多就会缺少直观的选取
-  // TODO 自由绘制
   // TODO 画饼
   // TODO 画框
   // TODO 画线
@@ -231,39 +242,48 @@ void Program::trigger(const int idx) {
   // TODO 移动选中的值
   // TODO 随机化填充功能，需要设定一个填充比例
   // TODO 上下层功能
-  int old_select_type = select_type;
-  int old_special_action = special_action;
+  // int old_select_type = select_type;
+  // int old_special_action = special_action;
+  // if (idx > 0) {
+  //   select_type = idx;
+  //   special_action = 0;
+  // } else if (idx < 0) {
+  //   special_action = idx;
+  //   select_type = 0;
+  // } else {
+  //   select_type = 0;
+  //   special_action = 0;
+  // }
+  // FIXME 由于上面的意思是如果选了左侧功能，右侧功能区会自动被激活，这是一个问题，按理说两侧功能区不影响
+  // old是当前正处于激活状态的
+  // 否则就是当前的选择的功能
+  // 如果当前的一致就只执行这个
+  // 如果不同就上一个与该功能同时执行激活
+  // 如果当前激活的是不同侧的功能，那么当前侧的不影响，之激活另一侧的，另一侧的待机是0
+  size_t length = set_select_flag.size();
   if (idx > 0) {
-    select_type = idx;
-    special_action = 0;
-  } else if (idx < 0) {
-    special_action = idx;
-    select_type = 0;
-  } else {
-    select_type = 0;
-    special_action = 0;
-  }
-  if (select_type == old_select_type) {
-    if (select_type != 0)
+    // 左侧功能
+    if (idx != select_type && select_type != 0) {
+      // cancel old function is different from current select.
       set_select_flag[select_type - 1]();
-    else
-      select_type=0;
-  } else {
-    if (old_select_type > 0) {
-      set_select_flag[old_select_type - 1]();
     }
-    set_select_flag[select_type - 1]();
-  }
-  if (special_action == old_special_action) {
-    if (special_action != 0)
-      set_select_flag[set_select_flag.size() + special_action]();
+    // enable function
+    set_select_flag[idx - 1]();
+    if (idx != select_type)
+      select_type = idx;
     else
-      special_action=0;
-  } else {
-    if (old_special_action > 0) {
-      set_select_flag[set_select_flag.size() + old_special_action]();
+      select_type = 0;
+  } else if (idx < 0) {
+    // 右侧功能
+    if (idx != special_action && special_action != 0) {
+      set_select_flag[length + special_action]();
     }
-    set_select_flag[set_select_flag.size() + special_action]();
+    set_select_flag[length + idx]();
+    if (idx != special_action)
+      special_action = idx;
+    else
+      special_action = 0;
+  } else {
   }
 }
 
