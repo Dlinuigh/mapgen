@@ -78,16 +78,87 @@ void Map::generate_grid(SDL_Renderer *render) const {
 void Map::draw_grid(SDL_Renderer *render) const {
   SDL_RenderTexture(render, grid, nullptr, &area);
 }
+void Map::move_point(glm::ivec2 pos) {
+  char code = special_action == -1 ? ' ' : keycode;
+  std::set<std::pair<int, int>> tmp;
+  std::pair pair = std::pair(pos.x, pos.y);
+  tmp.insert(pair);
+  std::vector<glm::ivec2> points = {
+      glm::ivec2(pos.x + 1, pos.y),
+      glm::ivec2(pos.x - 1, pos.y),
+      glm::ivec2(pos.x, pos.y + 1),
+      glm::ivec2(pos.x, pos.y - 1),
+  };
+  char old_code = data[pos.x][pos.y];
+  for (auto &it : adj_block[old_code]) {
+    if (it.contains(pair)) {
+      auto iter = std::find(it.begin(), it.end(), pair);
+      it.erase(iter);
+    }
+  }
+  adj_block[code].push_back(tmp);
+  auto p = adj_block[code].rbegin();
+  for (auto it = adj_block[code].rbegin() + 1; it != adj_block[code].rend(); it++) {
+    for (auto point : points) {
+      if (is_valid(point.x, point.y) && data[point.x][point.y] == code &&
+          it->contains(std::pair(point.x, point.y))) {
+        if (p->size() > it->size()) {
+          for (auto &_point : *it) {
+            p->insert(_point);
+          }
+          adj_block[code].erase(it.base() - 1);
+        } else {
+          for (auto &_point : *p) {
+            it->insert(_point);
+          }
+          adj_block[code].erase(p.base() - 1);
+          p = it;
+        }
+      }
+    }
+  }
+  data[pos_start.x][pos_start.y] = code;
+}
+void Map::move_draw_set(SDL_Renderer *render, char code, std::set<std::pair<int, int>> &s_p) {
+  for (auto &_point : s_p) {
+    std::vector<std::pair<int, int>> points = {
+        std::pair(_point.first + 1, _point.second),
+        std::pair(_point.first - 1, _point.second),
+        std::pair(_point.first, _point.second + 1),
+        std::pair(_point.first, _point.second - 1),
+    };
+    for (auto &_p : points) {
+      if (is_valid(_p.first, _p.second) && data[_p.first][_p.second] != code) {
+        if (adj_block.contains(code) || adj_block[code].size()==0) {
+          for (auto &t : s_p) {
+            data[t.first][t.second] = code;
+            draw_tile(render, glm::ivec2(t.first, t.second));
+          }
+          adj_block[code].push_back(std::move(s_p));
+          return;
+        } else {
+          for (auto &it : adj_block[code]) {
+            if (it.contains(_p)) {
+              for (auto &_tmp : s_p) {
+                data[_tmp.first][_tmp.second] = code;
+                draw_tile(render, glm::ivec2(_tmp.first, _tmp.second));
+                it.insert(_tmp);
+              }
+              return;
+            }
+          }
+        }
+      }
+    }
+  }
+}
 void Map::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *target = SDL_GetRenderTarget(render);
   SDL_SetRenderTarget(render, bg);
   if (begin_draw) {
     switch (select_type) {
     case 1: {
-      auto pair = std::pair(pos_start.x, pos_start.y);
-      adj_block[data[pos_start.x][pos_start.y]].erase(pair);
-      adj_block[special_action == -1 ? ' ' : keycode].insert(pair);
-      data[pos_start.x][pos_start.y] = special_action == -1 ? ' ' : keycode;
+      move_point(pos_start);
       draw_tile(render, pos_start);
       begin_draw = false;
       break;
@@ -99,24 +170,24 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       const int max_y = std::max(pos_start.y, pos_end.y);
       for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
-          auto point = std::pair(i, j);
-          adj_block[data[i][j]].erase(point);
-          adj_block[special_action == -1 ? ' ' : keycode].insert(point);
-          data[i][j] = special_action == -1 ? ' ' : keycode;
-          draw_tile(render, glm::ivec2(i, j));
+          glm::ivec2 point = glm::ivec2(i, j);
+          move_point(point);
+          draw_tile(render, point);
         }
       }
       begin_draw = false;
       break;
     }
     case 3: {
-      adj_block[special_action == -1 ? ' ' : keycode].insert(
-          adj_block[data[pos_start.x][pos_start.y]].begin(),
-          adj_block[data[pos_start.x][pos_start.y]].end());
-      adj_block.erase(data[pos_start.x][pos_start.y]);
-      for (const auto &it : adj_block[special_action == -1 ? ' ' : keycode]) {
-        data[it.first][it.second] = special_action == -1 ? ' ' : keycode;
-        draw_tile(render, glm::ivec2(it.first, it.second));
+      char code = special_action == -1 ? ' ' : keycode;
+      char old_code = data[pos_start.x][pos_start.y];
+      std::pair pair = std::pair(pos_start.x, pos_start.y);
+      for (auto it = adj_block[old_code].begin(); it != adj_block[old_code].end(); it++) {
+        if (it->contains(pair)) {
+          move_draw_set(render, code, *it);
+          adj_block[old_code].erase(it);
+          break;
+        }
       }
       begin_draw = false;
       break;
@@ -124,10 +195,7 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
     case 4: {
       // free paint
       glm::ivec2 point = get_grid();
-      std::pair pair = std::pair(point.x, point.y);
-      adj_block[data[point.x][point.y]].erase(pair);
-      adj_block[special_action == -1 ? ' ' : keycode].insert(pair);
-      data[point.x][point.y] = special_action == -1 ? ' ' : keycode;
+      move_point(point);
       draw_tile(render, point);
       break;
     }

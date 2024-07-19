@@ -63,11 +63,13 @@ class Map final : public Widget {
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
   // std::vector<std::vector<bool>> walked;
-  std::map<char, std::set<std::pair<int, int>>> adj_block; // for fill function
+  std::map<char, std::vector<std::set<std::pair<int, int>>>> adj_block; // for fill function
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
   void generate_grid(SDL_Renderer *) const;
+  void move_point(glm::ivec2 pos);
+  void move_draw_set(SDL_Renderer*, char, std::set<std::pair<int,int>>&);
   [[nodiscard]] bool is_valid(int, int) const;
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
 
@@ -80,9 +82,10 @@ public:
     area.w = w;
     area.h = h;
     data.assign(size.y, std::vector(size.x, ' '));
+    adj_block[' '].assign(1, {});
     for (int i = 0; i < size.x; i++) {
       for (int j = 0; j < size.y; j++) {
-        adj_block[' '].insert(std::pair(i, j));
+        adj_block[' '][0].insert(std::pair(i, j));
       }
     }
     bg = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, w, h);
