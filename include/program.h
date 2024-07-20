@@ -53,8 +53,10 @@ class Program {
   void set_view();
 
 public:
-  Program(const int w, const int h, const int col, const int row, const int _tile_size)
-      : tile_size(static_cast<float>(_tile_size)), graphic(Graphic::getInstance()), font(Font::getInstance()) {
+  Program(const int w, const int h, const int col, const int row,
+          const int _tile_size)
+      : tile_size(static_cast<float>(_tile_size)),
+        graphic(Graphic::getInstance()), font(Font::getInstance()) {
     scr_size = glm::ivec2(w, h);
     init();
     set_view();

@@ -15,8 +15,8 @@ void Box::push_back(const std::shared_ptr<Widget> &child) {
 }
 bool Box::pressed(SDL_Event &event) {
   if (in()) {
-    return std::ranges::any_of(children,
-                               [&event](auto it) { return it->pressed(event); });
+    return std::ranges::any_of(
+        children, [&event](auto it) { return it->pressed(event); });
   }
   return false;
 }
@@ -62,7 +62,8 @@ void Box::locate(glm::fvec2 position) {
     }
   }
 }
-void View::push_back(const std::shared_ptr<Widget> &child, Position position, int click_pior, int draw_pior) {
+void View::push_back(const std::shared_ptr<Widget> &child, Position position,
+                     int click_pior, int draw_pior) {
   children.emplace_back(click_pior, draw_pior, child, position);
 }
 void View::locate() {
@@ -70,13 +71,15 @@ void View::locate() {
     locate_child(fst, snd);
   }
 }
-void View::locate_child(const std::shared_ptr<Widget> &child, const Position position) const {
+void View::locate_child(const std::shared_ptr<Widget> &child,
+                        const Position position) const {
   // 根据大小与相对位置确定绝对位置
   glm::fvec2 pos = {};
   glm::fvec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
                               static_cast<float>(scr_size.y) - child->area.h};
-  glm::fvec2 c_lu_cor_pos = {static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
-                             static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
+  glm::fvec2 c_lu_cor_pos = {
+      static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
+      static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
   switch (position) {
   case LU_CORNER:
     pos = {0, 0};

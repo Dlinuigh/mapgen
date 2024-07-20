@@ -94,7 +94,8 @@ void Program::create_v_main() {
   panel->push_back(eraser);
   // 整理大小
   panel->set_size();
-  const auto save = std::make_shared<Check>(graphic.get_tile("tool", "save"), nullptr);
+  const auto save =
+      std::make_shared<Check>(graphic.get_tile("tool", "save"), nullptr);
   save->resize(enlarge_tile * 2.0f);
   save->press = [this] { print(); };
   v_main->push_back(save, D_SIDE, -1, 4);
@@ -107,7 +108,8 @@ void Program::handle() {
   SDL_PollEvent(&event);
   if (event.type == SDL_EVENT_KEY_DOWN) {
     if (event.key.mod & SDL_KMOD_SHIFT) {
-      if (event.key.key >= static_cast<int>('a') && event.key.key <= static_cast<int>('z')) {
+      if (event.key.key >= static_cast<int>('a') &&
+          event.key.key <= static_cast<int>('z')) {
         keycode = static_cast<char>(event.key.key - 'a' + 'A');
       } else {
         switch (event.key.key) {
@@ -229,8 +231,9 @@ void Program::print() const {
 }
 
 void Program::trigger(const int idx) {
-  // TODO 填充功能与set不是很配合，因为set只是将相同的放到了一起，没有判断是否相连，判断相连工作量巨大，需要判断这个点和内部的所有点是否有相连的，如果有就加入，否则就另外建一个set,这个样子导致我们的原始数据结构也不行。emmm,不过考虑到判断相连不会很麻烦，所以我觉得最难的在与优化，举个例子，如果我能得到一个多边形，然后判断点与多边形的关系。
-  //上面的问题解决了，通过在data里面判断周围是否存在某个集合就行，如果存在就加入这个集合
+  // TODO
+  // 填充功能与set不是很配合，因为set只是将相同的放到了一起，没有判断是否相连，判断相连工作量巨大，需要判断这个点和内部的所有点是否有相连的，如果有就加入，否则就另外建一个set,这个样子导致我们的原始数据结构也不行。emmm,不过考虑到判断相连不会很麻烦，所以我觉得最难的在与优化，举个例子，如果我能得到一个多边形，然后判断点与多边形的关系。
+  // 上面的问题解决了，通过在data里面判断周围是否存在某个集合就行，如果存在就加入这个集合
   // TODO 蓝图功能引入非常关键，之前的很多就会缺少直观的选取
   // TODO 画饼
   // TODO 画框
@@ -254,7 +257,8 @@ void Program::trigger(const int idx) {
   //   select_type = 0;
   //   special_action = 0;
   // }
-  // FIXME 由于上面的意思是如果选了左侧功能，右侧功能区会自动被激活，这是一个问题，按理说两侧功能区不影响
+  // FIXME
+  // 由于上面的意思是如果选了左侧功能，右侧功能区会自动被激活，这是一个问题，按理说两侧功能区不影响
   // old是当前正处于激活状态的
   // 否则就是当前的选择的功能
   // 如果当前的一致就只执行这个
@@ -303,7 +307,8 @@ bool Program::is_quit(const SDL_Event &event) {
 }
 
 void Program::init() {
-  window = SDL_CreateWindow("Program", scr_size.x, scr_size.y, SDL_WINDOW_RESIZABLE);
+  window =
+      SDL_CreateWindow("Program", scr_size.x, scr_size.y, SDL_WINDOW_RESIZABLE);
   render = SDL_CreateRenderer(window, nullptr);
   graphic.set_render(render);
 }
@@ -312,8 +317,8 @@ void Program::set_view() {
   if (view != nullptr) {
     SDL_DestroyTexture(view);
   }
-  view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET,
-                           scr_size.x, scr_size.y);
+  view = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
+                           SDL_TEXTUREACCESS_TARGET, scr_size.x, scr_size.y);
 }
 
 void Program::run() {

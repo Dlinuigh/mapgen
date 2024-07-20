@@ -5,10 +5,12 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <functional>
 #include <glm/glm.hpp>
+#include <list>
 #include <set>
 class Widget {
 public:
-  float ratio = 1.0f; // 计算完成area.w与h才能开始计算ratio,对于一些组件可能会延后。
+  float ratio =
+      1.0f; // 计算完成area.w与h才能开始计算ratio,对于一些组件可能会延后。
   SDL_Color fcolor = {};
   SDL_FRect area = {};
   SDL_Texture *bg = nullptr;
@@ -49,27 +51,31 @@ public:
   void draw(SDL_Renderer *render, SDL_Event) override;
 };
 class Map final : public Widget {
-  std::map<std::string, bool> buttons; // 按钮的状态,左键、右键、中键、侧键1、侧键2
+  std::map<std::string, bool>
+      buttons; // 按钮的状态,左键、右键、中键、侧键1、侧键2
   char keycode = ' ';
-  bool begin_draw;
-  bool already_selected_one;
-  int tile_size;
-  int select_type;
-  int special_action;
+  bool begin_draw = false;
+  bool already_selected_one = false;
+  int tile_size = 0;
+  int select_type = 0;
+  int special_action = 0;
   glm::ivec2 size; // map grid size, col and row
   glm::ivec2 pos_start;
   glm::ivec2 pos_end;
   Graphic &graphic;
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
-  // std::vector<std::vector<bool>> walked;
-  std::map<char, std::vector<std::set<std::pair<int, int>>>> adj_block; // for fill function
+  std::vector<std::vector<bool>> walked;
+  std::map<char, std::vector<std::list<std::pair<int, int>>>>
+      adj_block; // for fill function
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
   void generate_grid(SDL_Renderer *) const;
   void move_point(glm::ivec2 pos);
-  void move_draw_set(SDL_Renderer*, char, std::set<std::pair<int,int>>&);
+  void general_handle(int, char, char);
+  void move_draw_set(SDL_Renderer *, char, char,
+                     std::set<std::pair<int, int>> &);
   [[nodiscard]] bool is_valid(int, int) const;
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
 
@@ -82,15 +88,19 @@ public:
     area.w = w;
     area.h = h;
     data.assign(size.y, std::vector(size.x, ' '));
+    walked.assign(size.y, std::vector(size.x, false));
     adj_block[' '].assign(1, {});
     for (int i = 0; i < size.x; i++) {
       for (int j = 0; j < size.y; j++) {
-        adj_block[' '][0].insert(std::pair(i, j));
+        adj_block[' '][0].push_back(std::pair(i, j));
       }
     }
-    bg = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, w, h);
-    grid = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, w, h);
-    SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b, SDL_ALPHA_TRANSPARENT);
+    bg = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
+                           SDL_TEXTUREACCESS_TARGET, w, h);
+    grid = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
+                             SDL_TEXTUREACCESS_TARGET, w, h);
+    SDL_SetRenderDrawColor(render, bgcolor.r, bgcolor.g, bgcolor.b,
+                           SDL_ALPHA_TRANSPARENT);
     SDL_SetTextureBlendMode(bg, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(grid, SDL_BLENDMODE_BLEND);
     SDL_Texture *texture = SDL_GetRenderTarget(render);
