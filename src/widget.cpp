@@ -194,7 +194,7 @@ void Map::merge_list(std::set<int> &prepared, char code) {
   for (auto &i : prepared) {
     heap.push(std::pair(adj_block[code][i].size(), i));
   }
-  while (heap.size() > 0) {
+  while (heap.size() > 1) {
     std::pair _p_1 = heap.top();
     heap.pop();
     std::pair _p_2 = heap.top();
@@ -415,7 +415,7 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       std::set<int> prepared;
       prepared.insert(adj_block[code].size());
       prepare(prepared, pos_start, code);
-
+      // FIXME 多个之间不会合并
       char old_code = data[pos_start.x][pos_start.y];
       data[pos_start.x][pos_start.y] = code;
       // move_point(pos_start);
@@ -441,8 +441,8 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       prepared.insert(adj_block[code].size());
       for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
-          glm::ivec2 point(i,j);
-          if(i==min_x || i== max_x || j==min_y || j==max_y){
+          glm::ivec2 point(i, j);
+          if (i == min_x || i == max_x || j == min_y || j == max_y) {
             // 四周是和其他地方接壤的唯一可能点,当然还可以进一步优化,例如,中心点一定不接壤
             prepare(prepared, point, code);
           }
@@ -487,13 +487,97 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
         //     }
         //   }
         // }
-        for (int i = 0; i < adj_block[old_code].size(); i++) {
-          auto _iter = std::find(adj_block[old_code][i].begin(),
-                                 adj_block[old_code][i].end(), _pair);
-          if (_iter != adj_block[old_code][i].end()) {
-            // general_handle(render, adj_block[code].size() - 1, code, old_code);
+        // FIXME
+        // 由于fill需要检查所有的接壤点是否是相同的未来字符,如果是代表需要合并.那么这个操作需要对全部的点的全部周围点进行快速检查.
+        int idx = 0;
+        std::set<int> prepared; // 之后待合并的列表
+        for (int k = 0; k < adj_block[old_code].size(); k++) {
+          auto _iter = std::find(adj_block[old_code][k].begin(),
+                                 adj_block[old_code][k].end(), _pair);
+          if (_iter != adj_block[old_code][k].end()) {
+            // 找到连成块的集合.
+            // TODO 上面的通用函数里面有仍然是分类,但是这一次长度变成其他情况
+            // 计算长度,先不放到新位置
+            idx = k;
+            int length_old = adj_block[old_code][k].size();
+            int length_code = 0;
+            for (auto &it : adj_block[code]) {
+              length_code += it.size();
+            }
+            if (length_code < length_old) {
+              int i = 0;
+              for (auto &s : adj_block[code]) {
+                for (auto &_p : s) {
+                  std::vector<std::pair<int, int>> adj;
+                  if (is_valid(_p.first + 1, _p.second) &&
+                      data[_p.first + 1][_p.second] == code) {
+                    adj.emplace_back(_p.first + 1, _p.second);
+                  }
+                  if (is_valid(_p.first - 1, _p.second) &&
+                      data[_p.first - 1][_p.second] == code) {
+                    adj.emplace_back(_p.first - 1, _p.second);
+                  }
+                  if (is_valid(_p.first, _p.second + 1) &&
+                      data[_p.first][_p.second + 1] == code) {
+                    adj.emplace_back(_p.first, _p.second + 1);
+                  }
+                  if (is_valid(_p.first, _p.second - 1) &&
+                      data[_p.first][_p.second - 1] == code) {
+                    adj.emplace_back(_p.first, _p.second - 1);
+                  }
+                  if (std::find(adj_block[old_code][idx].begin(),
+                                adj_block[old_code][idx].end(),
+                                _p) != adj_block[old_code][idx].end()) {
+                    prepared.insert(i);
+                  }
+                }
+                i++;
+              }
+            } else {
+              for (auto &_p : adj_block[old_code][idx]) {
+                std::vector<std::pair<int, int>> adj;
+                if (is_valid(_p.first + 1, _p.second) &&
+                    data[_p.first + 1][_p.second] == code) {
+                  adj.emplace_back(_p.first + 1, _p.second);
+                }
+                if (is_valid(_p.first - 1, _p.second) &&
+                    data[_p.first - 1][_p.second] == code) {
+                  adj.emplace_back(_p.first - 1, _p.second);
+                }
+                if (is_valid(_p.first, _p.second + 1) &&
+                    data[_p.first][_p.second + 1] == code) {
+                  adj.emplace_back(_p.first, _p.second + 1);
+                }
+                if (is_valid(_p.first, _p.second - 1) &&
+                    data[_p.first][_p.second - 1] == code) {
+                  adj.emplace_back(_p.first, _p.second - 1);
+                }
+                int i = 0;
+                for (auto &s : adj_block[code]) {
+                  for (auto &a : adj) {
+                    if (std::find(s.begin(), s.end(), a) != s.end()) {
+                      prepared.insert(i);
+                      break;
+                    }
+                  }
+                  i++;
+                }
+              }
+            }
+            for (auto _p : adj_block[old_code][k]) {
+              data[_p.first][_p.second] = code;
+              draw_tile(render, glm::ivec2(_p.first, _p.second));
+            }
+            // general_handle(render, adj_block[code].size() - 1, code,
+            // old_code);
+            break;
           }
         }
+        prepared.insert(adj_block[code].size());
+        adj_block[code].push_back(std::move(adj_block[old_code][idx]));
+        // 保留位置,在此处进行删除
+        adj_block[old_code].erase(adj_block[old_code].begin() + idx);
+        merge_list(prepared, code);
       }
       begin_draw = false;
       break;
@@ -502,6 +586,7 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       // free paint
       glm::ivec2 point = get_grid();
       // move_point(point);
+      // TODO 待实现
       draw_tile(render, point);
       break;
     }
