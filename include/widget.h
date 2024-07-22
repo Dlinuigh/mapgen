@@ -72,10 +72,13 @@ class Map final : public Widget {
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
   void generate_grid(SDL_Renderer *) const;
-  void move_point(glm::ivec2 pos);
-  void general_handle(int, char, char);
-  void move_draw_set(SDL_Renderer *, char, char,
-                     std::set<std::pair<int, int>> &);
+  // void move_point(glm::ivec2 pos);
+  void find_remove(std::pair<int, int> _pair, char);
+  void general_handle(SDL_Renderer *, int, char);
+  void prepare(std::set<int> &, glm::ivec2, char);
+  void merge_list(std::set<int> &idx, char code);
+  // void move_draw_set(SDL_Renderer *, char, char,
+  //  std::set<std::pair<int, int>> &);
   [[nodiscard]] bool is_valid(int, int) const;
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
 
