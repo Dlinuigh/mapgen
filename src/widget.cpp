@@ -109,7 +109,7 @@ void Map::prepare(std::set<int> &prepared, glm::ivec2 pos, char code) {
         if (!prepared.contains(s)) {
           // 集合只添加一次
           auto i = std::find(adj_block[code][s].begin(),
-                             adj_block[code][s].end(), std::pair(a.x,a.y));
+                             adj_block[code][s].end(), std::pair(a.x, a.y));
           if (i != adj_block[code][s].end()) {
             // 找到了这个唯一的集合
             prepared.insert(s);
@@ -156,20 +156,27 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
   if (begin_draw) {
     switch (select_type) {
     case 1: {
-      std::set<int> prepared;
-      prepared.insert(adj_block[code].size());
-      prepare(prepared, pos_start, code);
-      // FIXME 多个之间不会合并
+      // FIXME 清除不会将本来分裂的集合不会自动进行分裂,事实上我也没有任何处理手段
+      /*
+      ### -> #.#但是左右的#他们仍然是一个整体,如果增加一个检查是否连接的函数,似乎代价快赶上dfs了.所有的成本都快赶上了.但是我正在处理的符号并不是#,也就意味着我需要一个全局连通检查,不现实
+      问题也不在于此,我大可以在处理该符号的时候检查旧符号是否连通,如果因为这个修改而不连通就将集合进行分裂,我感觉不如增加邻接连通矩阵,然后直接在矩阵上修改来得快dfs的问题就是没有引入连通.
+      想要继续该方法必须要解决:迅速判断集合是否出现了分裂.然而最佳方法居然是路径搜索算法.
+      所以最后就是只有一个方法了.
+      */
       char old_code = data[pos_start.x][pos_start.y];
-      data[pos_start.x][pos_start.y] = code;
-      // move_point(pos_start);
-      draw_tile(render, pos_start);
-      std::pair _pair(pos_start.x, pos_start.y);
-      find_remove(_pair, old_code);
-      std::list<std::pair<int, int>> tmp;
-      tmp.push_back(_pair);
-      adj_block[code].push_back(tmp);
-      merge_list(prepared, code);
+      if (old_code != code) {
+        std::set<int> prepared;
+        prepared.insert(adj_block[code].size());
+        prepare(prepared, pos_start, code);
+        data[pos_start.x][pos_start.y] = code;
+        draw_tile(render, pos_start);
+        std::pair _pair(pos_start.x, pos_start.y);
+        find_remove(_pair, old_code);
+        std::list<std::pair<int, int>> tmp;
+        tmp.push_back(_pair);
+        adj_block[code].push_back(tmp);
+        merge_list(prepared, code);
+      }
       begin_draw = false;
       break;
     }
@@ -209,17 +216,12 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       char old_code = data[pos_start.x][pos_start.y];
       std::pair _pair = std::pair(pos_start.x, pos_start.y);
       if (old_code != code) {
-        // FIXME
-        // 由于fill需要检查所有的接壤点是否是相同的未来字符,如果是代表需要合并.那么这个操作需要对全部的点的全部周围点进行快速检查.
         int idx = 0;
         std::set<int> prepared; // 之后待合并的列表
         for (int k = 0; k < adj_block[old_code].size(); k++) {
           auto _iter = std::find(adj_block[old_code][k].begin(),
                                  adj_block[old_code][k].end(), _pair);
           if (_iter != adj_block[old_code][k].end()) {
-            // 找到连成块的集合.
-            // TODO 上面的通用函数里面有仍然是分类,但是这一次长度变成其他情况
-            // 计算长度,先不放到新位置
             idx = k;
             int length_old = adj_block[old_code][k].size();
             int length_code = 0;
@@ -305,9 +307,20 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
     case 4: {
       // free paint
       glm::ivec2 point = get_grid();
-      // move_point(point);
-      // TODO 待实现
-      draw_tile(render, point);
+      char old_code = data[point.x][point.y];
+      if (old_code != code) {
+        std::set<int> prepared;
+        prepared.insert(adj_block[code].size());
+        prepare(prepared, point, code);
+        data[point.x][point.y] = code;
+        draw_tile(render, point);
+        std::pair _pair(point.x, point.y);
+        find_remove(_pair, old_code);
+        std::list<std::pair<int, int>> tmp;
+        tmp.push_back(_pair);
+        adj_block[code].push_back(tmp);
+        merge_list(prepared, code);
+      }
       break;
     }
       // case 4: {
