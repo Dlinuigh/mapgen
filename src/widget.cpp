@@ -149,6 +149,34 @@ void Map::find_remove(std::pair<int, int> _pair, char old_code) {
     }
   }
 }
+void Map::dfs(SDL_Renderer *render, glm::ivec2 point, char old_code) {
+  walked.assign(size.x, std::vector(size.y, false));
+  char code = special_action == -1 ? ' ' : keycode;
+  std::vector<glm::ivec2> block;
+  block.push_back(point);
+  data[point.x][point.y] = code;
+  walked[point.x][point.y] = true;
+  draw_tile(render, point);
+  while (!block.empty()) {
+    glm::ivec2 pos = block.back();
+    block.pop_back();
+    std::vector<glm::ivec2> adj = {
+        glm::ivec2(pos.x + 1, pos.y),
+        glm::ivec2(pos.x - 1, pos.y),
+        glm::ivec2(pos.x, pos.y + 1),
+        glm::ivec2(pos.x, pos.y - 1),
+    };
+    for (auto &a : adj) {
+      if (is_valid(a.x, a.y) && !walked[a.x][a.y] &&
+          data[a.x][a.y] == old_code) {
+        block.push_back(a);
+        draw_tile(render, a);
+        walked[a.x][a.y] = true;
+        data[a.x][a.y] = code;
+      }
+    }
+  }
+}
 void Map::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *target = SDL_GetRenderTarget(render);
   SDL_SetRenderTarget(render, bg);
@@ -156,26 +184,28 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
   if (begin_draw) {
     switch (select_type) {
     case 1: {
-      // FIXME 清除不会将本来分裂的集合不会自动进行分裂,事实上我也没有任何处理手段
+      // FIXME
+      // 清除不会将本来分裂的集合不会自动进行分裂,事实上我也没有任何处理手段
       /*
-      ### -> #.#但是左右的#他们仍然是一个整体,如果增加一个检查是否连接的函数,似乎代价快赶上dfs了.所有的成本都快赶上了.但是我正在处理的符号并不是#,也就意味着我需要一个全局连通检查,不现实
+      ### ->
+      #.#但是左右的#他们仍然是一个整体,如果增加一个检查是否连接的函数,似乎代价快赶上dfs了.所有的成本都快赶上了.但是我正在处理的符号并不是#,也就意味着我需要一个全局连通检查,不现实
       问题也不在于此,我大可以在处理该符号的时候检查旧符号是否连通,如果因为这个修改而不连通就将集合进行分裂,我感觉不如增加邻接连通矩阵,然后直接在矩阵上修改来得快dfs的问题就是没有引入连通.
       想要继续该方法必须要解决:迅速判断集合是否出现了分裂.然而最佳方法居然是路径搜索算法.
       所以最后就是只有一个方法了.
       */
       char old_code = data[pos_start.x][pos_start.y];
       if (old_code != code) {
-        std::set<int> prepared;
-        prepared.insert(adj_block[code].size());
-        prepare(prepared, pos_start, code);
+        //   std::set<int> prepared;
+        //   prepared.insert(adj_block[code].size());
+        //   prepare(prepared, pos_start, code);
         data[pos_start.x][pos_start.y] = code;
         draw_tile(render, pos_start);
-        std::pair _pair(pos_start.x, pos_start.y);
-        find_remove(_pair, old_code);
-        std::list<std::pair<int, int>> tmp;
-        tmp.push_back(_pair);
-        adj_block[code].push_back(tmp);
-        merge_list(prepared, code);
+        //   std::pair _pair(pos_start.x, pos_start.y);
+        //   find_remove(_pair, old_code);
+        //   std::list<std::pair<int, int>> tmp;
+        //   tmp.push_back(_pair);
+        //   adj_block[code].push_back(tmp);
+        //   merge_list(prepared, code);
       }
       begin_draw = false;
       break;
@@ -185,121 +215,126 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       const int min_y = std::min(pos_start.y, pos_end.y);
       const int max_x = std::max(pos_start.x, pos_end.x);
       const int max_y = std::max(pos_start.y, pos_end.y);
-      std::list<std::pair<int, int>> tmp;
-      char old_code = data[pos_start.x][pos_start.y];
-      std::set<int> prepared;
-      prepared.insert(adj_block[code].size());
+      // std::list<std::pair<int, int>> tmp;
+      // std::set<int> prepared;
+      // prepared.insert(adj_block[code].size());
       for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
-          glm::ivec2 point(i, j);
-          if (i == min_x || i == max_x || j == min_y || j == max_y) {
-            // 四周是和其他地方接壤的唯一可能点,当然还可以进一步优化,例如,中心点一定不接壤
-            prepare(prepared, point, code);
+          if(data[i][j]!=code){
+            glm::ivec2 point(i, j);
+            data[i][j] = code;
+            draw_tile(render, point);
           }
+          
+          // if (i == min_x || i == max_x || j == min_y || j == max_y) {
+          //   // 四周是和其他地方接壤的唯一可能点,当然还可以进一步优化,例如,中心点一定不接壤
+          //   prepare(prepared, point, code);
+          // }
           // glm::ivec2 point = glm::ivec2(i, j);
-          data[i][j] = code;
+          
           // move_point(point);
-          draw_tile(render, point);
-          std::pair _pair(i, j);
+          
+          // std::pair _pair(i, j);
           // delete point from old code set
-          find_remove(_pair, old_code);
+          // find_remove(_pair, old_code);
           // add to new code set
-          tmp.push_back(_pair);
+          // tmp.push_back(_pair);
         }
       }
-      adj_block[code].push_back(tmp);
-      merge_list(prepared, code);
+      // adj_block[code].push_back(tmp);
+      // merge_list(prepared, code);
       begin_draw = false;
       break;
     }
     case 3: {
       char old_code = data[pos_start.x][pos_start.y];
-      std::pair _pair = std::pair(pos_start.x, pos_start.y);
+      // std::pair _pair = std::pair(pos_start.x, pos_start.y);
       if (old_code != code) {
-        int idx = 0;
-        std::set<int> prepared; // 之后待合并的列表
-        for (int k = 0; k < adj_block[old_code].size(); k++) {
-          auto _iter = std::find(adj_block[old_code][k].begin(),
-                                 adj_block[old_code][k].end(), _pair);
-          if (_iter != adj_block[old_code][k].end()) {
-            idx = k;
-            int length_old = adj_block[old_code][k].size();
-            int length_code = 0;
-            for (auto &it : adj_block[code]) {
-              length_code += it.size();
-            }
-            if (length_code < length_old) {
-              int i = 0;
-              for (auto &s : adj_block[code]) {
-                for (auto &_p : s) {
-                  std::vector<std::pair<int, int>> adj;
-                  if (is_valid(_p.first + 1, _p.second) &&
-                      data[_p.first + 1][_p.second] == code) {
-                    adj.emplace_back(_p.first + 1, _p.second);
-                  }
-                  if (is_valid(_p.first - 1, _p.second) &&
-                      data[_p.first - 1][_p.second] == code) {
-                    adj.emplace_back(_p.first - 1, _p.second);
-                  }
-                  if (is_valid(_p.first, _p.second + 1) &&
-                      data[_p.first][_p.second + 1] == code) {
-                    adj.emplace_back(_p.first, _p.second + 1);
-                  }
-                  if (is_valid(_p.first, _p.second - 1) &&
-                      data[_p.first][_p.second - 1] == code) {
-                    adj.emplace_back(_p.first, _p.second - 1);
-                  }
-                  if (std::find(adj_block[old_code][idx].begin(),
-                                adj_block[old_code][idx].end(),
-                                _p) != adj_block[old_code][idx].end()) {
-                    prepared.insert(i);
-                  }
-                }
-                i++;
-              }
-            } else {
-              for (auto &_p : adj_block[old_code][idx]) {
-                std::vector<std::pair<int, int>> adj;
-                if (is_valid(_p.first + 1, _p.second) &&
-                    data[_p.first + 1][_p.second] == code) {
-                  adj.emplace_back(_p.first + 1, _p.second);
-                }
-                if (is_valid(_p.first - 1, _p.second) &&
-                    data[_p.first - 1][_p.second] == code) {
-                  adj.emplace_back(_p.first - 1, _p.second);
-                }
-                if (is_valid(_p.first, _p.second + 1) &&
-                    data[_p.first][_p.second + 1] == code) {
-                  adj.emplace_back(_p.first, _p.second + 1);
-                }
-                if (is_valid(_p.first, _p.second - 1) &&
-                    data[_p.first][_p.second - 1] == code) {
-                  adj.emplace_back(_p.first, _p.second - 1);
-                }
-                int i = 0;
-                for (auto &s : adj_block[code]) {
-                  for (auto &a : adj) {
-                    if (std::find(s.begin(), s.end(), a) != s.end()) {
-                      prepared.insert(i);
-                      break;
-                    }
-                  }
-                  i++;
-                }
-              }
-            }
-            for (auto _p : adj_block[old_code][k]) {
-              data[_p.first][_p.second] = code;
-              draw_tile(render, glm::ivec2(_p.first, _p.second));
-            }
-            break;
-          }
-        }
-        prepared.insert(adj_block[code].size());
-        adj_block[code].push_back(std::move(adj_block[old_code][idx]));
-        // 保留位置,在此处进行删除
-        adj_block[old_code].erase(adj_block[old_code].begin() + idx);
-        merge_list(prepared, code);
+      //   int idx = 0;
+      //   std::set<int> prepared; // 之后待合并的列表
+      //   for (int k = 0; k < adj_block[old_code].size(); k++) {
+      //     auto _iter = std::find(adj_block[old_code][k].begin(),
+      //                            adj_block[old_code][k].end(), _pair);
+      //     if (_iter != adj_block[old_code][k].end()) {
+      //       idx = k;
+      //       int length_old = adj_block[old_code][k].size();
+      //       int length_code = 0;
+      //       for (auto &it : adj_block[code]) {
+      //         length_code += it.size();
+      //       }
+      //       if (length_code < length_old) {
+      //         int i = 0;
+      //         for (auto &s : adj_block[code]) {
+      //           for (auto &_p : s) {
+      //             std::vector<std::pair<int, int>> adj;
+      //             if (is_valid(_p.first + 1, _p.second) &&
+      //                 data[_p.first + 1][_p.second] == code) {
+      //               adj.emplace_back(_p.first + 1, _p.second);
+      //             }
+      //             if (is_valid(_p.first - 1, _p.second) &&
+      //                 data[_p.first - 1][_p.second] == code) {
+      //               adj.emplace_back(_p.first - 1, _p.second);
+      //             }
+      //             if (is_valid(_p.first, _p.second + 1) &&
+      //                 data[_p.first][_p.second + 1] == code) {
+      //               adj.emplace_back(_p.first, _p.second + 1);
+      //             }
+      //             if (is_valid(_p.first, _p.second - 1) &&
+      //                 data[_p.first][_p.second - 1] == code) {
+      //               adj.emplace_back(_p.first, _p.second - 1);
+      //             }
+      //             if (std::find(adj_block[old_code][idx].begin(),
+      //                           adj_block[old_code][idx].end(),
+      //                           _p) != adj_block[old_code][idx].end()) {
+      //               prepared.insert(i);
+      //             }
+      //           }
+      //           i++;
+      //         }
+      //       } else {
+      //         for (auto &_p : adj_block[old_code][idx]) {
+      //           std::vector<std::pair<int, int>> adj;
+      //           if (is_valid(_p.first + 1, _p.second) &&
+      //               data[_p.first + 1][_p.second] == code) {
+      //             adj.emplace_back(_p.first + 1, _p.second);
+      //           }
+      //           if (is_valid(_p.first - 1, _p.second) &&
+      //               data[_p.first - 1][_p.second] == code) {
+      //             adj.emplace_back(_p.first - 1, _p.second);
+      //           }
+      //           if (is_valid(_p.first, _p.second + 1) &&
+      //               data[_p.first][_p.second + 1] == code) {
+      //             adj.emplace_back(_p.first, _p.second + 1);
+      //           }
+      //           if (is_valid(_p.first, _p.second - 1) &&
+      //               data[_p.first][_p.second - 1] == code) {
+      //             adj.emplace_back(_p.first, _p.second - 1);
+      //           }
+      //           int i = 0;
+      //           for (auto &s : adj_block[code]) {
+      //             for (auto &a : adj) {
+      //               if (std::find(s.begin(), s.end(), a) != s.end()) {
+      //                 prepared.insert(i);
+      //                 break;
+      //               }
+      //             }
+      //             i++;
+      //           }
+      //         }
+      //       }
+      //       for (auto _p : adj_block[old_code][k]) {
+      //         data[_p.first][_p.second] = code;
+      //         draw_tile(render, glm::ivec2(_p.first, _p.second));
+      //       }
+      //       break;
+      //     }
+      //   }
+      //   prepared.insert(adj_block[code].size());
+      //   adj_block[code].push_back(std::move(adj_block[old_code][idx]));
+      //   // 保留位置,在此处进行删除
+      //   adj_block[old_code].erase(adj_block[old_code].begin() + idx);
+      //   merge_list(prepared, code);
+        dfs(render, pos_start, old_code);
       }
       begin_draw = false;
       break;
@@ -309,17 +344,17 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       glm::ivec2 point = get_grid();
       char old_code = data[point.x][point.y];
       if (old_code != code) {
-        std::set<int> prepared;
-        prepared.insert(adj_block[code].size());
-        prepare(prepared, point, code);
+        // std::set<int> prepared;
+        // prepared.insert(adj_block[code].size());
+        // prepare(prepared, point, code);
         data[point.x][point.y] = code;
         draw_tile(render, point);
-        std::pair _pair(point.x, point.y);
-        find_remove(_pair, old_code);
-        std::list<std::pair<int, int>> tmp;
-        tmp.push_back(_pair);
-        adj_block[code].push_back(tmp);
-        merge_list(prepared, code);
+        // std::pair _pair(point.x, point.y);
+        // find_remove(_pair, old_code);
+        // std::list<std::pair<int, int>> tmp;
+        // tmp.push_back(_pair);
+        // adj_block[code].push_back(tmp);
+        // merge_list(prepared, code);
       }
       break;
     }

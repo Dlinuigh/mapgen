@@ -66,6 +66,8 @@ class Map final : public Widget {
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
   std::vector<std::vector<bool>> walked;
+  // TODO 换回之前的dfs或者是bfs,都行.
+  void dfs(SDL_Renderer*,glm::ivec2,char);
   std::map<char, std::vector<std::list<std::pair<int, int>>>>
       adj_block; // for fill function
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
