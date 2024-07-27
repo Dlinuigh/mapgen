@@ -5,8 +5,6 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <functional>
 #include <glm/glm.hpp>
-#include <list>
-#include <set>
 class Widget {
 public:
   float ratio =
@@ -66,17 +64,11 @@ class Map final : public Widget {
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
   std::vector<std::vector<bool>> walked;
-  // TODO 换回之前的dfs或者是bfs,都行.
   void dfs(SDL_Renderer*,glm::ivec2,char);
-  std::map<char, std::vector<std::list<std::pair<int, int>>>>
-      adj_block; // for fill function
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
   void generate_grid(SDL_Renderer *) const;
-  void find_remove(std::pair<int, int> _pair, char);
-  void prepare(std::set<int> &, glm::ivec2, char);
-  void merge_list(std::set<int> &idx, char code);
   [[nodiscard]] bool is_valid(int, int) const;
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
 
@@ -90,12 +82,6 @@ public:
     area.h = h;
     data.assign(size.y, std::vector(size.x, ' '));
     walked.assign(size.y, std::vector(size.x, false));
-    adj_block[' '].assign(1, {});
-    for (int i = 0; i < size.x; i++) {
-      for (int j = 0; j < size.y; j++) {
-        adj_block[' '][0].push_back(std::pair(i, j));
-      }
-    }
     bg = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
                            SDL_TEXTUREACCESS_TARGET, w, h);
     grid = SDL_CreateTexture(render, SDL_PIXELFORMAT_ABGR8888,
