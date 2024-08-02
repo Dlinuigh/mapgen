@@ -9,7 +9,7 @@
 class Box final : public Widget {
   std::vector<std::shared_ptr<Widget>> children;
   bool vertical = false; // 竖直排列？
-  glm::fvec2 child_size = {0, 0};
+  glm::vec2 child_size = {0, 0};
 
 public:
   explicit Box(const bool _vertical) : vertical(_vertical) {}
@@ -22,7 +22,7 @@ public:
 
   void set_size();
 
-  void locate(glm::fvec2 position) override;
+  void locate(glm::vec2 position) override;
 };
 struct Compare {
   const int column = 0;

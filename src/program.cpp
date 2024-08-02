@@ -46,7 +46,7 @@ void Program::create_v_main() {
   auto saw = std::make_shared<Check>(texture_saw, texture);
   auto choose = std::make_shared<Check>(texture_choose, texture);
   auto move = std::make_shared<Check>(texture_move, texture);
-  constexpr glm::fvec2 enlarge_tile(32, 32);
+  constexpr glm::vec2 enlarge_tile(32, 32);
   point->resize(enlarge_tile);
   rect->resize(enlarge_tile);
   eraser->resize(enlarge_tile);
@@ -231,15 +231,7 @@ void Program::print() const {
 }
 
 void Program::trigger(const int idx) {
-  // TODO
-  // 填充功能与set不是很配合，因为set只是将相同的放到了一起，没有判断是否相连，判断相连工作量巨大，需要判断这个点和内部的所有点是否有相连的，如果有就加入，否则就另外建一个set,这个样子导致我们的原始数据结构也不行。emmm,不过考虑到判断相连不会很麻烦，所以我觉得最难的在与优化，举个例子，如果我能得到一个多边形，然后判断点与多边形的关系。
-  // 上面的问题解决了，通过在data里面判断周围是否存在某个集合就行，如果存在就加入这个集合
   // TODO 蓝图功能引入非常关键，之前的很多就会缺少直观的选取
-  // TODO 画饼
-  // TODO 画框
-  // TODO 画线
-  // TODO
-  // 画锯齿，也就是类似海岸线的状态，你可以让他在绘制的一定范围内波动，但是要求连接。有点像正弦函数，举个例子，你绘制了从一个点到另一个点会绘制经过这两个点的正弦曲线。
   // TODO
   // 选择状态，相当于擦除的对立功能，选择后会停留在选取，使用移动可以移动选取,这个时候会取消选取功能进入移动功能，而与擦除也是对立的，不能同时生效。而直接移动可以与其他的配合，但是只能移动一次选中的内容。首先点击选中，然后左键长按会进入移动状态，放下停止该次移动。而可以重复移动。更换功能会清除选取内容。
   // TODO 移动选中的值

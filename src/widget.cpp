@@ -1,6 +1,7 @@
 #include "widget.h"
+#include <random>
 bool Widget::in() const {
-  glm::fvec2 mouse;
+  glm::vec2 mouse;
   SDL_GetMouseState(&mouse.x, &mouse.y);
   return mouse.x > area.x && mouse.x <= area.x + area.w && mouse.y > area.y &&
          mouse.y <= area.y + area.h;
@@ -9,11 +10,11 @@ void Widget::draw(SDL_Renderer *, SDL_Event) {}
 bool Widget::pressed(SDL_Event &) { return false; }
 bool Widget::released(SDL_Event &) { return false; }
 bool Widget::hovering(SDL_Event &) { return false; }
-void Widget::locate(const glm::fvec2 position) {
+void Widget::locate(const glm::vec2 position) {
   area.x = position.x;
   area.y = position.y;
 }
-void Widget::resize(const glm::fvec2 size) {
+void Widget::resize(const glm::vec2 size) {
   area.w = size.x;
   area.h = size.y;
 }
@@ -99,6 +100,48 @@ void Map::dfs(SDL_Renderer *render, glm::ivec2 point, char old_code) {
     }
   }
 }
+std::vector<glm::ivec2> Map::circle(int num_points) {
+  // FIXME 使用等距弧度不够精准
+  std::vector<glm::ivec2> points;
+
+  // 判断是否能构成矩形
+  if (pos_start == pos_end) {
+    return points;
+  }
+
+  // 计算中心点和半轴
+  glm::ivec2 center((pos_start.x + pos_end.x) / 2,
+                    (pos_start.y + pos_end.y) / 2);
+  double half_width = std::abs(pos_start.x - pos_end.x) / 2.0;
+  double half_height = std::abs(pos_start.y - pos_end.y) / 2.0;
+
+  // 判断是否是正方形
+  bool isSquare = std::abs(half_width - half_height) < 1e-6; // 允许微小误差
+  double radius_x, radius_y;
+  if (isSquare) {
+    radius_x = radius_y = half_width; // 正方形的情况下，两个半轴相等
+  } else {
+    radius_x = half_width;
+    radius_y = half_height;
+  }
+
+  // 生成椭圆或圆形的点
+  double angle_step = 2 * M_PI / num_points;
+  for (int i = 0; i < num_points; ++i) {
+    double angle = i * angle_step;
+    int x = static_cast<int>(center.x + radius_x * std::cos(angle));
+    int y = static_cast<int>(center.y + radius_y * std::sin(angle));
+
+    glm::ivec2 point(x, y);
+
+    // 检查点是否有效
+    if (is_valid(point.x, point.y)) {
+      points.push_back(point);
+    }
+  }
+
+  return points;
+}
 void Map::draw(SDL_Renderer *render, SDL_Event) {
   SDL_Texture *target = SDL_GetRenderTarget(render);
   SDL_SetRenderTarget(render, bg);
@@ -149,18 +192,15 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       break;
     }
     case 5: {
-      // TODO circle
-      const int min_x = std::min(pos_start.x, pos_end.x);
-      const int min_y = std::min(pos_start.y, pos_end.y);
-      const int max_x = std::max(pos_start.x, pos_end.x);
-      const int max_y = std::max(pos_start.y, pos_end.y);
-      /*
-      椭圆?或者是满足一个尺度,长或者宽,或者经过三个点的圆?我们不是函数绘图软件,我只是一个绘制工具,绘制圆就是越简单的操作越好,我恨不得定一个点,然后鼠标移动模拟圆规
-      */
+      std::vector<glm::ivec2> points = circle(100);
+      for (auto &p : points) {
+        data[p.x][p.y] = code;
+        draw_tile(render, p);
+      }
+      begin_draw = false;
       break;
     }
     case 6: {
-      // TODO box empty inside
       const int min_x = std::min(pos_start.x, pos_end.x);
       const int min_y = std::min(pos_start.y, pos_end.y);
       const int max_x = std::max(pos_start.x, pos_end.x);
@@ -179,11 +219,70 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       break;
     }
     case 7: {
-      // TODO line
+      // FIXME
+      // 解决了旧问题，但是由于代码写得不够通用所以引出了新的问题,暂时去做其他功能
+      glm::ivec2 vector = pos_end - pos_start;
+      glm::ivec2 old[2];
+      if (vector.x != 0) {
+        float k = 1.0f * vector.y / vector.x;
+        int sign = (pos_end.x > pos_start.x) - (pos_end.x < pos_start.x);
+        float step = 1 / sqrt(1 + k * k) * sign;
+        old[0] = glm::ivec2(-1, -1);
+        old[1] = pos_start;
+        float i;
+        for (i = pos_start.x; std::abs(i - pos_end.x) > std::abs(step);
+             i += step) {
+          float j = ((i - pos_start.x) * k + pos_start.y);
+          glm::ivec2 point((int)i, (int)j);
+          if ((point.x == old[1].x && old[0].y == old[1].y) ||
+              (point.y == old[1].y && old[0].x == old[1].x)) {
+            old[1] = point;
+          } else {
+            data[old[1].x][old[1].y] = code;
+            draw_tile(render, old[1]);
+            old[0] = old[1];
+            old[1] = point;
+          }
+        }
+        float j = ((i - pos_start.x) * k + pos_start.y);
+        glm::ivec2 point((int)i, (int)j);
+        data[point.x][point.y] = code;
+        draw_tile(render, point);
+        data[old[1].x][old[1].y] = code;
+        draw_tile(render, old[1]);
+        data[pos_end.x][pos_end.y] = code;
+        draw_tile(render, pos_end);
+      } else {
+        int step = (pos_end.y > pos_start.y) - (pos_end.y < pos_start.y);
+        for (int j = pos_start.y; j != pos_end.y; j += step) {
+          glm::ivec2 point(pos_start.x, j);
+          data[pos_start.x][j] = code;
+          draw_tile(render, point);
+        }
+        data[pos_end.x][pos_end.y] = code;
+        draw_tile(render, pos_end);
+      }
+      begin_draw = false;
       break;
     }
-    case 8:{
-      // TODO saw
+    case 8: {
+      glm::ivec2 point = get_grid();
+      if (point.x != pos_start.x) {
+        float mu = 0, sigma = 0.5;
+        std::normal_distribution<float> distribution(mu, sigma);
+        glm::vec2 noise = {0, 0};
+        // noise.x = distribution(generator);
+        noise.y = distribution(generator);
+        glm::vec2 tmp = noise + (glm::vec2)point;
+        glm::ivec2 p = glm::ivec2(fmin(size.x, fmax(0, tmp.x)),
+                                  fmin(size.y, fmax(0, tmp.y)));
+        char old_code = data[p.x][p.y];
+        if (old_code != code) {
+          data[p.x][p.y] = code;
+          draw_tile(render, p);
+        }
+      }
+      pos_start = point;
       break;
     }
     }
@@ -222,7 +321,7 @@ bool Map::hovering(SDL_Event &) {
 }
 bool Map::released(SDL_Event &) {
   if (in()) {
-    if (select_type == 4) {
+    if (select_type == 4 || select_type == 8) {
       begin_draw = false;
     }
     return true;
@@ -239,7 +338,7 @@ bool Map::is_valid(const int x, const int y) const {
   return x >= 0 && y >= 0 && x < size.x && y < size.y;
 }
 glm::ivec2 Map::get_grid() const {
-  glm::fvec2 mouse_pos;
+  glm::vec2 mouse_pos;
   SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
   int x = (mouse_pos.x - area.x) / tile_size;
   int y = (mouse_pos.y - area.y) / tile_size;

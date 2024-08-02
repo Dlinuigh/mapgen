@@ -28,7 +28,7 @@ class Program {
   std::shared_ptr<Label> label_key;
   std::shared_ptr<Label> label_position;
 
-  glm::fvec2 map_old_position{};
+  glm::vec2 map_old_position{};
   glm::ivec2 map_size{};
 
   int select_type = 0; // 0代表点绘制后面依次递增

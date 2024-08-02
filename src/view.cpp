@@ -48,10 +48,10 @@ void Box::set_size() {
     // }
   }
 }
-void Box::locate(glm::fvec2 position) {
+void Box::locate(glm::vec2 position) {
   area.x = position.x;
   area.y = position.y;
-  glm::fvec2 offset = position;
+  glm::vec2 offset = position;
   for (const auto &it : children) {
     if (vertical) {
       it->locate({position.x, offset.y});
@@ -74,10 +74,10 @@ void View::locate() {
 void View::locate_child(const std::shared_ptr<Widget> &child,
                         const Position position) const {
   // 根据大小与相对位置确定绝对位置
-  glm::fvec2 pos = {};
-  glm::fvec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
+  glm::vec2 pos = {};
+  glm::vec2 rd_corner_pos = {static_cast<float>(scr_size.x) - child->area.w,
                               static_cast<float>(scr_size.y) - child->area.h};
-  glm::fvec2 c_lu_cor_pos = {
+  glm::vec2 c_lu_cor_pos = {
       static_cast<float>(scr_size.x) / 2.0f - child->area.w / 2,
       static_cast<float>(scr_size.y) / 2.0f - child->area.h / 2};
   switch (position) {

@@ -5,6 +5,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <functional>
 #include <glm/glm.hpp>
+#include <random>
 class Widget {
 public:
   float ratio =
@@ -22,8 +23,8 @@ public:
   virtual bool released(SDL_Event &); // 释放按键
   virtual bool hovering(SDL_Event &);
   virtual void draw(SDL_Renderer *, SDL_Event);
-  virtual void locate(glm::fvec2);
-  virtual void resize(glm::fvec2);
+  virtual void locate(glm::vec2);
+  virtual void resize(glm::vec2);
   // void resize(float, bool);
   [[nodiscard]] bool in() const;
 };
@@ -63,12 +64,15 @@ class Map final : public Widget {
   Graphic &graphic;
   SDL_Color bgcolor = {255, 255, 255, SDL_ALPHA_OPAQUE};
   SDL_Texture *grid;
+  std::random_device rd;
+  std::mt19937 generator = std::mt19937(rd());
   std::vector<std::vector<bool>> walked;
-  void dfs(SDL_Renderer*,glm::ivec2,char);
+  void dfs(SDL_Renderer *, glm::ivec2, char);
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;
   void draw_grid(SDL_Renderer *) const;
   void generate_grid(SDL_Renderer *) const;
+  std::vector<glm::ivec2> circle(int);
   [[nodiscard]] bool is_valid(int, int) const;
   [[nodiscard]] SDL_FRect get_area(glm::ivec2) const;
 
