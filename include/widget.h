@@ -6,6 +6,7 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include <random>
+#include <set>
 class Widget {
 public:
   float ratio =
@@ -49,6 +50,11 @@ public:
   void activate();
   void draw(SDL_Renderer *render, SDL_Event) override;
 };
+struct compare {
+  bool operator()(const glm::ivec2 &l, const glm::ivec2 &r) const {
+    return l.x > r.x || l.y > r.y;
+  }
+};
 class Map final : public Widget {
   std::map<std::string, bool>
       buttons; // 按钮的状态,左键、右键、中键、侧键1、侧键2
@@ -67,6 +73,7 @@ class Map final : public Widget {
   std::random_device rd;
   std::mt19937 generator = std::mt19937(rd());
   std::vector<std::vector<bool>> walked;
+  std::set<glm::ivec2, compare> selected;
   void dfs(SDL_Renderer *, glm::ivec2, char);
   void clear_tile(SDL_Renderer *, SDL_FRect) const;
   void draw_char(SDL_Renderer *, SDL_FRect) const;

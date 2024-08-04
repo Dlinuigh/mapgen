@@ -77,9 +77,14 @@ void Map::dfs(SDL_Renderer *render, glm::ivec2 point, char old_code) {
   char code = special_action == -1 ? ' ' : keycode;
   std::vector<glm::ivec2> block;
   block.push_back(point);
-  data[point.x][point.y] = code;
+  if (special_action == -2) {
+    if (!selected.contains(point))
+      selected.insert(point);
+  } else {
+    data[point.x][point.y] = code;
+    draw_tile(render, point);
+  }
   walked[point.x][point.y] = true;
-  draw_tile(render, point);
   while (!block.empty()) {
     glm::ivec2 pos = block.back();
     block.pop_back();
@@ -93,9 +98,14 @@ void Map::dfs(SDL_Renderer *render, glm::ivec2 point, char old_code) {
       if (is_valid(a.x, a.y) && !walked[a.x][a.y] &&
           data[a.x][a.y] == old_code) {
         block.push_back(a);
-        draw_tile(render, a);
         walked[a.x][a.y] = true;
-        data[a.x][a.y] = code;
+        if (special_action == -2) {
+          if (!selected.contains(a))
+            selected.insert(a);
+        } else {
+          draw_tile(render, a);
+          data[a.x][a.y] = code;
+        }
       }
     }
   }
@@ -148,11 +158,20 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
   char code = special_action == -1 ? ' ' : keycode;
   if (begin_draw) {
     switch (select_type) {
+      // TODO 这几个选取与选取功能的配合直接存放到一个数组里面为当前的选取点.
+      // TODO 移动的配合就是将里面的所有点移动鼠标移动的距离
+      // TODO 引入上色能力
+      // TODO 上下层功能将上下层的某一层进行虚化调整透明度.然后和该层进行叠加.
     case 1: {
       char old_code = data[pos_start.x][pos_start.y];
       if (old_code != code) {
-        data[pos_start.x][pos_start.y] = code;
-        draw_tile(render, pos_start);
+        if (special_action == -2) {
+          if (!selected.contains(pos_start))
+            selected.insert(pos_start);
+        } else {
+          data[pos_start.x][pos_start.y] = code;
+          draw_tile(render, pos_start);
+        }
       }
       begin_draw = false;
       break;
@@ -166,8 +185,13 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
         for (int j = min_y; j <= max_y; j++) {
           if (data[i][j] != code) {
             glm::ivec2 point(i, j);
-            data[i][j] = code;
-            draw_tile(render, point);
+            if (special_action == -2) {
+              if (!selected.contains(point))
+                selected.insert(point);
+            } else {
+              data[i][j] = code;
+              draw_tile(render, point);
+            }
           }
         }
       }
@@ -186,16 +210,26 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
       glm::ivec2 point = get_grid();
       char old_code = data[point.x][point.y];
       if (old_code != code) {
-        data[point.x][point.y] = code;
-        draw_tile(render, point);
+        if (special_action == -2) {
+          if (!selected.contains(point))
+            selected.insert(point);
+        } else {
+          data[point.x][point.y] = code;
+          draw_tile(render, point);
+        }
       }
       break;
     }
     case 5: {
       std::vector<glm::ivec2> points = circle(100);
       for (auto &p : points) {
-        data[p.x][p.y] = code;
-        draw_tile(render, p);
+        if (special_action == -2) {
+          if (!selected.contains(p))
+            selected.insert(p);
+        } else {
+          data[p.x][p.y] = code;
+          draw_tile(render, p);
+        }
       }
       begin_draw = false;
       break;
@@ -210,8 +244,13 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
           if (data[i][j] != code &&
               (i == min_x || i == max_x || j == min_y || j == max_y)) {
             glm::ivec2 point(i, j);
-            data[i][j] = code;
-            draw_tile(render, point);
+            if (special_action == -2) {
+              if (!selected.contains(point))
+                selected.insert(point);
+            } else {
+              data[i][j] = code;
+              draw_tile(render, point);
+            }
           }
         }
       }
@@ -238,26 +277,45 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
               (point.y == old[1].y && old[0].x == old[1].x)) {
             old[1] = point;
           } else {
-            data[old[1].x][old[1].y] = code;
-            draw_tile(render, old[1]);
+            if (special_action == -2) {
+              if (!selected.contains(old[1]))
+                selected.insert(old[1]);
+            } else {
+              data[old[1].x][old[1].y] = code;
+              draw_tile(render, old[1]);
+            }
             old[0] = old[1];
             old[1] = point;
           }
         }
         float j = ((i - pos_start.x) * k + pos_start.y);
         glm::ivec2 point((int)i, (int)j);
-        data[point.x][point.y] = code;
-        draw_tile(render, point);
-        data[old[1].x][old[1].y] = code;
-        draw_tile(render, old[1]);
-        data[pos_end.x][pos_end.y] = code;
-        draw_tile(render, pos_end);
+        if (special_action == -2) {
+          if (!selected.contains(point))
+            selected.insert(point);
+          if (!selected.contains(old[1]))
+            selected.insert(old[1]);
+          if (!selected.contains(pos_end))
+            selected.insert(pos_end);
+        } else {
+          data[point.x][point.y] = code;
+          draw_tile(render, point);
+          data[old[1].x][old[1].y] = code;
+          draw_tile(render, old[1]);
+          data[pos_end.x][pos_end.y] = code;
+          draw_tile(render, pos_end);
+        }
       } else {
         int step = (pos_end.y > pos_start.y) - (pos_end.y < pos_start.y);
         for (int j = pos_start.y; j != pos_end.y; j += step) {
           glm::ivec2 point(pos_start.x, j);
-          data[pos_start.x][j] = code;
-          draw_tile(render, point);
+          if (special_action == -2) {
+            if (!selected.contains(point))
+              selected.insert(point);
+          } else {
+            data[pos_start.x][j] = code;
+            draw_tile(render, point);
+          }
         }
         data[pos_end.x][pos_end.y] = code;
         draw_tile(render, pos_end);
@@ -278,8 +336,13 @@ void Map::draw(SDL_Renderer *render, SDL_Event) {
                                   fmin(size.y, fmax(0, tmp.y)));
         char old_code = data[p.x][p.y];
         if (old_code != code) {
-          data[p.x][p.y] = code;
-          draw_tile(render, p);
+          if (special_action == -2) {
+            if (!selected.contains(p))
+              selected.insert(p);
+          } else {
+            data[p.x][p.y] = code;
+            draw_tile(render, p);
+          }
         }
       }
       pos_start = point;
@@ -307,6 +370,16 @@ bool Map::pressed(SDL_Event &) {
         pos_start = get_grid();
         already_selected_one = true;
       }
+    }
+    // 注意这里是在下方的选择区域，所以如果特殊功能开启就不会因为点击而修改而是会一直触发
+    if (special_action == -2) {
+      // TODO choose 使用清除功能会自动清空selected
+      printf("%d\n", selected.size());
+      // selected.clear();
+    } else if (special_action == -3) {
+      // TODO move 移动后会在移动功能结束清空selected
+    } else if (special_action == -1) {
+      // 清除功能
     }
     return true;
   } else {
